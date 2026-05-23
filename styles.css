@@ -59,7 +59,7 @@ body {
 }
 
 .logo-text {
-    color: #f6d45d;
+    color: #ffffff;
     font-size: 1.8rem;
     font-weight: 700;
     display: flex;
@@ -67,7 +67,7 @@ body {
 }
 
 .logo-text span {
-    color: #ffffff;
+    color: #fff700;
 }
 
 .nav-links {
@@ -584,7 +584,6 @@ footer {
 @media (max-width: 768px) {
     .navbar {
         height: 9vh;
-        justify-content: space-around;
     }
 
     .logo {

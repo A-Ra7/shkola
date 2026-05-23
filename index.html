@@ -6,8 +6,97 @@
     <title>Школа Мечты - Яркая и радостная</title>
     <link rel="shortcut icon" href="img/logo.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Прелоадер */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .preloader-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            animation: preloaderPulse 2s ease-in-out infinite;
+        }
+        .preloader-logo-img {
+            width: 70px;
+            height: 58px;
+            background: url('img/logo.png') no-repeat center / cover;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+            border-radius: 30px;
+        }
+        .preloader-logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+        .preloader-logo-text span {
+            color: #ffd12a;
+        }
+        .preloader-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .preloader-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffcc00, #ffaa00);
+            border-radius: 2px;
+            animation: preloaderFill 1.5s ease-out forwards;
+        }
+        .preloader-subtext {
+            margin-top: 15px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        @keyframes preloaderPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes preloaderFill {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+    </style>
 </head>
 <body>
+    <div id="preloader">
+        <div class="preloader-logo">
+            <div class="preloader-logo-img"></div>
+            <div class="preloader-logo-text">Школа&nbsp;<span>Мечты</span></div>
+        </div>
+        <div class="preloader-bar">
+            <div class="preloader-bar-fill"></div>
+        </div>
+        <div class="preloader-subtext">Загрузка...</div>
+    </div>
     <!-- Меню с логотипом -->
     <nav class="navbar">
         <div class="logo">
@@ -67,7 +156,7 @@
                         <p>Ученики участвуют в реальных проектах, сотрудничают с компаниями и университетами, развивая критическое мышление и креативность.</p>
                     </div>
                 </div>
-
+                
                 <div class="feature-card">
                     <div class="feature-icon">
                         <img src="img/mozgi.png" alt="">
@@ -237,6 +326,13 @@
         </div>
     </footer>
 
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('preloader').classList.add('hidden');
+            }, 600);
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
