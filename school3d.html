@@ -36,7 +36,7 @@
         }
         #musicControls {
             position: absolute;
-            top: 60px;
+            top: 12px;
             right: 15px;
             background: rgba(0, 0, 0, 0.6);
             color: white;
@@ -114,58 +114,80 @@
                 display: none;
             }
             #info {
-                font-size: 18px;
+                font-size: 16px;
                 top: 10px;
+                text-align: left;
+                padding-left: 12px;
+                width: auto;
             }
             #musicControls {
-                top: auto;
-                top: 40px;
-                left: 50%;
-                transform: translateX(-50%);
-                right: auto;
-                background: rgba(0, 0, 0, 0.8);
-                border: 2px solid #ffaa00;
-                padding: 7px 20px;
-                font-size: 16px;
-                width: auto;
-                justify-content: center;
+                top: 8px;
+                right: 8px;
+                left: auto;
+                transform: none;
+                padding: 5px 12px;
+                font-size: 13px;
+                gap: 6px;
+            }
+            #musicToggle {
+                padding: 3px 10px;
+                font-size: 12px;
             }
             .action-buttons {
-                bottom: 12px;
-                left: 50%;
-                transform: translateX(-50%);
-                right: auto;
-                width: 90%;
-                align-items: center;
+                position: static;
+                width: auto;
+                align-items: stretch;
+                pointer-events: none;
             }
             .action-btn {
-                padding: 7px 20px;
-                font-size: 16px;
-                max-width: 250px;
+                position: absolute;
+                bottom: 12px;
+                padding: 8px 14px;
+                font-size: 14px;
+                min-width: auto;
+                max-width: none;
+                white-space: nowrap;
+                pointer-events: auto;
+            }
+            #btnEnterExit {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            #btnFloor {
+                right: 12px;
+                transform: none;
+            }
+            #btnBuilding {
+                left: 12px;
+                transform: none;
             }
         }
 
         @media (max-width: 480px) {
             #info {
-                font-size: 16px;
+                font-size: 14px;
                 top: 8px;
             }
             #musicControls {
-                top: 32px;
-                padding: 5px 14px;
-                font-size: 14px;
+                top: 6px;
+                right: 6px;
+                padding: 4px 10px;
+                font-size: 12px;
             }
-            .action-buttons {
-                bottom: 8px;
-                width: 95%;
-                gap: 6px;
+            #musicToggle {
+                padding: 2px 8px;
+                font-size: 11px;
             }
             .action-btn {
-                padding: 6px 14px;
-                font-size: 14px;
-                min-width: auto;
-                width: 100%;
-                max-width: 220px;
+                bottom: 8px;
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            #btnFloor {
+                left: 8px;
+            }
+            #btnBuilding {
+                right: 8px;
             }
         }
 
@@ -253,8 +275,8 @@
     
     <!-- Кнопки управления вместо клавиш -->
     <div class="action-buttons">
-        <button id="btnFloor" class="action-btn secondary" style="display:none">⬆️ 2-й этаж</button>
         <button id="btnBuilding" class="action-btn tertiary" style="display:none">🏫 Второй корпус</button>
+        <button id="btnFloor" class="action-btn secondary" style="display:none">⬆️ 2-й этаж</button>
         <button id="btnEnterExit" class="action-btn">🚪 Войти в школу</button>
     </div>
     
