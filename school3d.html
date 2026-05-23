@@ -1,0 +1,4855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Школа Мечты 3Д</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 100%);
+            font-family: Arial, sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 15px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            pointer-events: none;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            max-width: 300px;
+            z-index: 100;
+        }
+        #musicControls {
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        #musicToggle {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            border-radius: 20px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Стили для кнопок управления */
+        .action-buttons {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 200;
+        }
+        .action-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid #ffaa00;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            min-width: 200px;
+            text-align: center;
+        }
+        .action-btn:hover {
+            background: #ffaa00;
+            color: black;
+            transform: scale(1.05);
+        }
+        .action-btn:disabled {
+            opacity: 0.3;
+            pointer-events: none;
+            border-color: #999;
+        }
+        .action-btn.secondary {
+            border-color: #44aaff;
+        }
+        .action-btn.secondary:hover {
+            background: #44aaff;
+        }
+        .action-btn.tertiary {
+            border-color: #55cc55;
+        }
+        .action-btn.tertiary:hover {
+            background: #55cc55;
+        }
+
+        /* Мобильная версия */
+        @media (max-width: 1000px) {
+            #controls {
+                display: none;
+            }
+            #info {
+                font-size: 18px;
+                top: 10px;
+            }
+            #musicControls {
+                top: auto;
+                top: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                right: auto;
+                background: rgba(0, 0, 0, 0.8);
+                border: 2px solid #ffaa00;
+                padding: 7px 20px;
+                font-size: 16px;
+                width: auto;
+                justify-content: center;
+            }
+            .action-buttons {
+                bottom: 12px;
+                left: 50%;
+                transform: translateX(-50%);
+                right: auto;
+                width: 90%;
+                align-items: center;
+            }
+            .action-btn {
+                padding: 7px 20px;
+                font-size: 16px;
+                max-width: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #info {
+                font-size: 16px;
+                top: 8px;
+            }
+            #musicControls {
+                top: 32px;
+                padding: 5px 14px;
+                font-size: 14px;
+            }
+            .action-buttons {
+                bottom: 8px;
+                width: 95%;
+                gap: 6px;
+            }
+            .action-btn {
+                padding: 6px 14px;
+                font-size: 14px;
+                min-width: auto;
+                width: 100%;
+                max-width: 220px;
+            }
+        }
+
+        /* Скрываем подсказки */
+        #interactionHint, #floorHint, #buildingHint {
+            display: none;
+        }
+
+        /* Прелоадер поворота телефона */
+        #rotate-hint {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            gap: 20px;
+        }
+
+        .rotate-icon {
+            width: 80px;
+            height: 80px;
+            animation: rotatePhone 2s ease-in-out infinite;
+        }
+
+        @keyframes rotatePhone {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        .rotate-text {
+            font-size: 20px;
+            font-weight: 600;
+            padding: 0 30px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .rotate-subtext {
+            font-size: 14px;
+            opacity: 0.85;
+            padding: 0 30px;
+        }
+
+        /* Показываем прелоадер на мобильных в портретной ориентации */
+        @media screen and (max-width: 1000px) and (orientation: portrait) {
+            #rotate-hint {
+                display: flex;
+            }
+            #info, #controls, #musicControls, .action-buttons {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="rotate-hint">
+        <svg class="rotate-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12" y2="18"/>
+        </svg>
+        <div class="rotate-text">Поверните телефон</div>
+        <div class="rotate-subtext">Для лучшего просмотра 3D-модели поверните устройство в горизонтальное положение</div>
+    </div>
+    
+    <div id="info">Школа Мечты 3Д</div>
+    <div id="controls">
+        <strong>Управление:</strong><br>
+        • ЛКМ + движение = вращение камеры<br>
+        • ПКМ + движение = перемещение камеры<br>
+        • Колёсико мыши = приближение/отдаление<br>
+        • Используйте кнопки справа для перемещения
+    </div>
+    
+    <div id="musicControls">
+        <span>🎵</span>
+        <button id="musicToggle">Включить</button>
+    </div>
+    
+    <!-- Кнопки управления вместо клавиш -->
+    <div class="action-buttons">
+        <button id="btnFloor" class="action-btn secondary" style="display:none">⬆️ 2-й этаж</button>
+        <button id="btnBuilding" class="action-btn tertiary" style="display:none">🏫 Второй корпус</button>
+        <button id="btnEnterExit" class="action-btn">🚪 Войти в школу</button>
+    </div>
+    
+    <audio id="backgroundMusic" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // Управление музыкой
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        let isMusicPlaying = false;
+        
+        musicToggle.addEventListener('click', function() {
+            if (isMusicPlaying) {
+                backgroundMusic.pause();
+                musicToggle.textContent = 'Включить';
+            } else {
+                backgroundMusic.play().catch(e => {
+                    console.log("Автовоспроизведение заблокировано. Нажмите на кнопку еще раз.");
+                });
+                musicToggle.textContent = 'Выключить';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
+        
+        // Попытка автоматического запуска музыки (может быть заблокирована браузером)
+        window.addEventListener('click', function() {
+            if (!isMusicPlaying && document.hidden === false) {
+                backgroundMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicToggle.textContent = 'Выключить';
+                }).catch(e => {
+                    // Автовоспроизведение заблокировано, требуется действие пользователя
+                    console.log("Для воспроизведения музыки нажмите кнопку 'Включить'");
+                });
+            }
+        }, { once: true });
+        
+        // Инициализация сцены
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xE0F6FF);
+        
+        // Камера
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(50, 40, 80);
+        
+        // Рендерер
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+        
+        // Обработка изменения размера окна / поворота телефона
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        window.addEventListener('resize', onWindowResize);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(onWindowResize, 100);
+        });
+
+        // Управление камерой
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 10; // Минимальное расстояние приближения
+        controls.maxDistance = 150; // Максимальное расстояние удаления
+        
+        // Освещение
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+        scene.add(ambientLight);
+        
+        // Несколько directional lights с разных сторон для равномерного освещения
+        const sunLight1 = new THREE.DirectionalLight(0xffffff, 0.2);
+        sunLight1.position.set(15, 25, 15);
+        sunLight1.castShadow = true;
+        sunLight1.shadow.mapSize.width = 1024;
+        sunLight1.shadow.mapSize.height = 1024;
+        scene.add(sunLight1);
+        
+        const sunLight2 = new THREE.DirectionalLight(0xffffff, 0.2);
+        sunLight2.position.set(-15, 25, 15);
+        scene.add(sunLight2);
+        
+        const sunLight3 = new THREE.DirectionalLight(0xffffff, 0.2);
+        sunLight3.position.set(15, 25, -15);
+        scene.add(sunLight3);
+        
+        const sunLight4 = new THREE.DirectionalLight(0xffffff, 0.2);
+        sunLight4.position.set(-15, 25, -15);
+        scene.add(sunLight4);
+        
+        // Дополнительное освещение сверху для яркого неба
+        const skyLight = new THREE.HemisphereLight(0xffffff, 0xE0F6FF, 0.7);
+        skyLight.position.set(0, 50, 0);
+        scene.add(skyLight);
+        
+        // Массив для хранения зон столкновений (непроходимых зон)
+        const collisionZones = [];
+        
+        // Зоны, где нельзя размещать деревья (дорожки, спортивная площадка)
+        const noTreeZones = [];
+
+        // Баскетбольные мячи
+        const basketballs = [];
+        
+        // Внутренние стены школы
+        const interiorWalls = [];
+        
+        // Зоны столкновений для камеры внутри школы
+        const interiorCollisionZones = [];
+        
+        let isInsideSchool = false;
+        let currentFloor = 1; // 1 - первый этаж, 2 - второй этаж
+        let currentBuilding = 1; // 1 - первый корпус, 2 - второй корпус
+        
+        // Переменная для хранения последней валидной позиции камеры
+        let lastValidPosition = new THREE.Vector3();
+        
+        // Группы для внешней и внутренней сцены
+        const exteriorGroup = new THREE.Group();
+        const interiorGroup = new THREE.Group();
+        const interiorSecondFloorGroup = new THREE.Group();
+        const interiorSecondBuildingGroup = new THREE.Group();
+        const interiorSecondBuildingSecondFloorGroup = new THREE.Group(); // 2 этаж 2 корпуса
+        
+        // Изначально показываем только внешнюю сцену
+        scene.add(exteriorGroup);
+        interiorGroup.visible = false;
+        interiorSecondFloorGroup.visible = false;
+        interiorSecondBuildingGroup.visible = false;
+        interiorSecondBuildingSecondFloorGroup.visible = false;
+        scene.add(interiorGroup);
+        scene.add(interiorSecondFloorGroup);
+        scene.add(interiorSecondBuildingGroup);
+        scene.add(interiorSecondBuildingSecondFloorGroup);
+        
+        // Функция для проверки столкновений камеры с внутренними стенами
+        function checkCameraInteriorCollision(newPosition) {
+            const cameraRadius = 1.0; // Радиус камеры для столкновений
+            
+            for (const zone of interiorCollisionZones) {
+                const dx = Math.abs(newPosition.x - zone.x);
+                const dz = Math.abs(newPosition.z - zone.z);
+                
+                if (dx < (zone.width / 2 + cameraRadius) && 
+                    dz < (zone.depth / 2 + cameraRadius)) {
+                    return true; // Столкновение обнаружено
+                }
+            }
+            return false; // Столкновений нет
+        }
+        
+        // Функция для создания зон столкновений в классах
+        function addClassroomCollisionZones(classroom, x, z, width, depth) {
+            interiorCollisionZones.push({
+                x: x,
+                z: z,
+                width: width,
+                depth: depth
+            });
+            
+            // Добавляем стены класса как препятствия
+            interiorCollisionZones.push({
+                x: x - width/2 + 0.1,
+                z: z,
+                width: 0.2,
+                depth: depth
+            });
+            
+            interiorCollisionZones.push({
+                x: x + width/2 - 0.1,
+                z: z,
+                width: 0.2,
+                depth: depth
+            });
+            
+            interiorCollisionZones.push({
+                x: x,
+                z: z - depth/2 + 0.1,
+                width: width,
+                depth: 0.2
+            });
+            
+            interiorCollisionZones.push({
+                x: x,
+                z: z + depth/2 - 0.1,
+                width: width,
+                depth: 0.2
+            });
+        }
+        
+        // Добавляем зоны столкновений для коридоров
+        function addCorridorCollisionZones() {
+            // Главный коридор первого этажа
+            interiorCollisionZones.push({
+                x: 0,
+                z: 0,
+                width: 28,
+                depth: 23
+            });
+            
+            // Коридор второго этажа
+            interiorCollisionZones.push({
+                x: 0,
+                z: 0,
+                width: 28,
+                depth: 23
+            });
+            
+            // Лестничная клетка
+            interiorCollisionZones.push({
+                x: -10,
+                z: 4,
+                width: 4,
+                depth: 8
+            });
+        }
+        
+        // Функция для проверки столкновений с любыми объектами
+        function checkAnyCollision(x, z, radius) {
+            for (const zone of collisionZones) {
+                const dx = Math.abs(x - zone.x);
+                const dz = Math.abs(z - zone.z);
+                
+                if (dx < (zone.width / 2 + radius) && 
+                    dz < (zone.depth / 2 + radius)) {
+                    return true; // Столкновение обнаружено
+                }
+            }
+            return false; // Столкновений нет
+        }
+        
+        // Функция для проверки столкновений с внутренними стенами
+        function checkInteriorCollision(x, z, radius) {
+            for (const zone of interiorWalls) {
+                const dx = Math.abs(x - zone.x);
+                const dz = Math.abs(z - zone.z);
+                
+                if (dx < (zone.width / 2 + radius) && 
+                    dz < (zone.depth / 2 + radius)) {
+                    return true; // Столкновение обнаружено
+                }
+            }
+            return false; // Столкновений нет
+        }
+        
+        // Функция для проверки, находится ли точка в запретной зоне для деревьев
+        function isInNoTreeZone(x, z, radius) {
+            for (const zone of noTreeZones) {
+                const dx = Math.abs(x - zone.x);
+                const dz = Math.abs(z - zone.z);
+                
+                if (dx < (zone.width / 2 + radius) && 
+                    dz < (zone.depth / 2 + radius)) {
+                    return true; // Находится в запретной зоне
+                }
+            }
+            return false; // Не в запретной зоне
+        }
+
+        // Создание баскетбольного мяча
+        function createBasketball(x, y, z) {
+            const geometry = new THREE.SphereGeometry(0.4, 16, 16);
+            const textureLoader = new THREE.TextureLoader();
+            const texture = textureLoader.load('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23FF8C00"/></svg>');
+            const material = new THREE.MeshPhongMaterial({ 
+                map: texture,
+                color: 0xFF8C00
+            });
+            
+            const ball = new THREE.Mesh(geometry, material);
+            ball.position.set(x, y, z);
+            ball.castShadow = true;
+            ball.receiveShadow = true;
+            
+            scene.add(ball);
+            basketballs.push(ball);
+            return ball;
+        }
+        
+        // Создание реалистичного комнатного растения в горшке
+        function createIndoorPlant(posX, posY, posZ, scale = 1) {
+            const plantGroup = new THREE.Group();
+            
+            // Керамический горшок
+            const potGeo = new THREE.CylinderGeometry(0.4 * scale, 0.3 * scale, 0.5 * scale, 16);
+            const potMat = new THREE.MeshPhongMaterial({ 
+                color: 0xA0522D,
+                shininess: 20
+            });
+            const pot = new THREE.Mesh(potGeo, potMat);
+            pot.position.y = 0.25 * scale;
+            pot.castShadow = true;
+            pot.receiveShadow = true;
+            plantGroup.add(pot);
+            
+            // Земля в горшке
+            const soilGeo = new THREE.CylinderGeometry(0.35 * scale, 0.35 * scale, 0.1 * scale, 16);
+            const soilMat = new THREE.MeshPhongMaterial({ 
+                color: 0x4A3728
+            });
+            const soil = new THREE.Mesh(soilGeo, soilMat);
+            soil.position.y = 0.52 * scale;
+            plantGroup.add(soil);
+            
+            // Главный стебель
+            const stemGeo = new THREE.CylinderGeometry(0.04 * scale, 0.05 * scale, 1.2 * scale, 8);
+            const stemMat = new THREE.MeshPhongMaterial({ 
+                color: 0x2F5C2F,
+                shininess: 10
+            });
+            const stem = new THREE.Mesh(stemGeo, stemMat);
+            stem.position.y = 1.15 * scale;
+            stem.castShadow = true;
+            plantGroup.add(stem);
+            
+            // Листья - простые овальные формы
+            const leafMat = new THREE.MeshPhongMaterial({ 
+                color: 0x3A8B3A,
+                shininess: 25,
+                side: THREE.DoubleSide
+            });
+            
+            const darkLeafMat = new THREE.MeshPhongMaterial({ 
+                color: 0x2D6B2D,
+                shininess: 20,
+                side: THREE.DoubleSide
+            });
+            
+            // Создаем листья на разных уровнях
+            const leafPositions = [
+                { x: 0.3, y: 0.9, z: 0, rot: 0.5 },
+                { x: -0.25, y: 1.0, z: 0.2, rot: -0.4 },
+                { x: 0.2, y: 1.2, z: -0.25, rot: 0.6 },
+                { x: -0.3, y: 1.3, z: -0.1, rot: -0.5 },
+                { x: 0.15, y: 1.5, z: 0.2, rot: 0.3 },
+                { x: -0.2, y: 1.6, z: 0, rot: -0.4 }
+            ];
+            
+            leafPositions.forEach((pos, i) => {
+                // Форма листа - сплюснутая сфера
+                const leafGeo = new THREE.SphereGeometry(0.25 * scale, 10, 8);
+                leafGeo.scale(0.5, 1, 1.8);
+                
+                const leaf = new THREE.Mesh(leafGeo, i % 2 === 0 ? leafMat : darkLeafMat);
+                leaf.position.set(pos.x * scale, pos.y * scale, pos.z * scale);
+                leaf.rotation.z = pos.rot;
+                leaf.rotation.y = Math.atan2(pos.z, pos.x);
+                
+                leaf.castShadow = true;
+                plantGroup.add(leaf);
+            });
+            
+            // Простой красивый цветок
+            const flowerGroup = new THREE.Group();
+            flowerGroup.position.set(0, 1.75 * scale, 0);
+            
+            // Центр цветка
+            const centerGeo = new THREE.SphereGeometry(0.1 * scale, 12, 12);
+            const centerMat = new THREE.MeshPhongMaterial({ 
+                color: 0xFFEB3B,
+                shininess: 30
+            });
+            const center = new THREE.Mesh(centerGeo, centerMat);
+            flowerGroup.add(center);
+            
+            // Лепестки - 6 штук, расположены по кругу
+            const petalCount = 6;
+            const petalMat = new THREE.MeshPhongMaterial({ 
+                color: 0xFF5252,
+                shininess: 35,
+                side: THREE.DoubleSide
+            });
+            
+            for (let i = 0; i < petalCount; i++) {
+                const angle = (i / petalCount) * Math.PI * 2;
+                
+                // Лепесток - овальная форма
+                const petalGeo = new THREE.SphereGeometry(0.12 * scale, 10, 8);
+                petalGeo.scale(0.6, 1.5, 1);
+                
+                const petal = new THREE.Mesh(petalGeo, petalMat);
+                petal.position.set(
+                    Math.cos(angle) * 0.18 * scale,
+                    0,
+                    Math.sin(angle) * 0.18 * scale
+                );
+                
+                // Наклон лепестка
+                petal.rotation.y = angle;
+                petal.rotation.x = 0.4;
+                
+                petal.castShadow = true;
+                flowerGroup.add(petal);
+            }
+            
+            plantGroup.add(flowerGroup);
+            
+            // Один бутон сбоку
+            const budGeo = new THREE.SphereGeometry(0.08 * scale, 10, 10);
+            budGeo.scale(0.8, 1.4, 0.8);
+            const budMat = new THREE.MeshPhongMaterial({ 
+                color: 0xE53935,
+                shininess: 25
+            });
+            const bud = new THREE.Mesh(budGeo, budMat);
+            bud.position.set(0.25 * scale, 1.4 * scale, 0.15 * scale);
+            bud.rotation.z = 0.3;
+            bud.castShadow = true;
+            plantGroup.add(bud);
+            
+            // Стебелек бутона
+            const budStemGeo = new THREE.CylinderGeometry(0.02 * scale, 0.025 * scale, 0.35 * scale, 6);
+            const budStemMat = new THREE.MeshPhongMaterial({ color: 0x2F5C2F });
+            const budStem = new THREE.Mesh(budStemGeo, budStemMat);
+            budStem.position.set(0.15 * scale, 1.22 * scale, 0.1 * scale);
+            budStem.rotation.z = 0.4;
+            plantGroup.add(budStem);
+            
+            plantGroup.position.set(posX, posY + 0.5 * scale, posZ);
+            return plantGroup;
+        }
+        
+        // Создание учебника
+        function createTextbook(posX, posY, posZ, color = 0x4169E1, rotation = 0) {
+            const bookGroup = new THREE.Group();
+            
+            // Обложка учебника
+            const coverGeo = new THREE.BoxGeometry(0.25, 0.03, 0.35);
+            const coverMat = new THREE.MeshPhongMaterial({ 
+                color: color,
+                shininess: 30
+            });
+            const cover = new THREE.Mesh(coverGeo, coverMat);
+            cover.castShadow = true;
+            bookGroup.add(cover);
+            
+            // Страницы (белая полоска сбоку)
+            const pagesGeo = new THREE.BoxGeometry(0.24, 0.025, 0.34);
+            const pagesMat = new THREE.MeshPhongMaterial({ color: 0xFFFFF0 });
+            const pages = new THREE.Mesh(pagesGeo, pagesMat);
+            pages.position.y = 0.001;
+            bookGroup.add(pages);
+            
+            bookGroup.position.set(posX, posY, posZ);
+            bookGroup.rotation.y = rotation;
+            return bookGroup;
+        }
+        
+        // Создание тарелки с едой
+        function createPlate(posX, posY, posZ) {
+            const plateGroup = new THREE.Group();
+            
+            // Тарелка (увеличенная)
+            const plateGeo = new THREE.CylinderGeometry(0.25, 0.22, 0.04, 20);
+            const plateMat = new THREE.MeshPhongMaterial({ 
+                color: 0xFFFFF0,
+                shininess: 60
+            });
+            const plate = new THREE.Mesh(plateGeo, plateMat);
+            plate.castShadow = true;
+            plate.receiveShadow = true;
+            plateGroup.add(plate);
+            
+            // Ободок тарелки
+            const rimGeo = new THREE.TorusGeometry(0.24, 0.015, 8, 20);
+            const rimMat = new THREE.MeshPhongMaterial({ 
+                color: 0xE8E8E8,
+                shininess: 50
+            });
+            const rim = new THREE.Mesh(rimGeo, rimMat);
+            rim.position.y = 0.02;
+            rim.rotation.x = Math.PI / 2;
+            plateGroup.add(rim);
+            
+            // Разнообразная еда на тарелке
+            const foodType = Math.floor(Math.random() * 4);
+            
+            if (foodType === 0) {
+                // Вариант 1: Котлета с гарниром
+                // Котлета
+                const cutletGeo = new THREE.SphereGeometry(0.08, 12, 10);
+                cutletGeo.scale(1.2, 0.4, 1);
+                const cutletMat = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+                const cutlet = new THREE.Mesh(cutletGeo, cutletMat);
+                cutlet.position.set(-0.05, 0.03, 0);
+                cutlet.castShadow = true;
+                plateGroup.add(cutlet);
+                
+                // Картофельное пюре
+                const mashGeo = new THREE.SphereGeometry(0.07, 10, 8);
+                mashGeo.scale(1, 0.6, 1);
+                const mashMat = new THREE.MeshPhongMaterial({ color: 0xFFF8DC });
+                const mash = new THREE.Mesh(mashGeo, mashMat);
+                mash.position.set(0.08, 0.025, 0.05);
+                plateGroup.add(mash);
+                
+                // Овощи (помидор)
+                const tomatoGeo = new THREE.SphereGeometry(0.03, 8, 8);
+                const tomatoMat = new THREE.MeshPhongMaterial({ color: 0xFF6347 });
+                const tomato = new THREE.Mesh(tomatoGeo, tomatoMat);
+                tomato.position.set(0.1, 0.025, -0.08);
+                plateGroup.add(tomato);
+                
+                // Огурец
+                const cucumberGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.06, 8);
+                const cucumberMat = new THREE.MeshPhongMaterial({ color: 0x228B22 });
+                const cucumber = new THREE.Mesh(cucumberGeo, cucumberMat);
+                cucumber.rotation.z = Math.PI / 2;
+                cucumber.position.set(0.05, 0.025, -0.1);
+                plateGroup.add(cucumber);
+                
+            } else if (foodType === 1) {
+                // Вариант 2: Макароны с соусом
+                // Макароны (несколько цилиндров)
+                for (let i = 0; i < 8; i++) {
+                    const pastaGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.08, 6);
+                    const pastaMat = new THREE.MeshPhongMaterial({ color: 0xFFE4B5 });
+                    const pasta = new THREE.Mesh(pastaGeo, pastaMat);
+                    pasta.rotation.set(
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI
+                    );
+                    pasta.position.set(
+                        (Math.random() - 0.5) * 0.15,
+                        0.03,
+                        (Math.random() - 0.5) * 0.15
+                    );
+                    plateGroup.add(pasta);
+                }
+                
+                // Соус (красный)
+                const sauceGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.01, 16);
+                const sauceMat = new THREE.MeshPhongMaterial({ color: 0xDC143C });
+                const sauce = new THREE.Mesh(sauceGeo, sauceMat);
+                sauce.position.y = 0.035;
+                plateGroup.add(sauce);
+                
+            } else if (foodType === 2) {
+                // Вариант 3: Рис с курицей
+                // Рис (куча маленьких зерен)
+                const riceGeo = new THREE.SphereGeometry(0.09, 10, 8);
+                riceGeo.scale(1, 0.5, 1);
+                const riceMat = new THREE.MeshPhongMaterial({ color: 0xFFFAF0 });
+                const rice = new THREE.Mesh(riceGeo, riceMat);
+                rice.position.set(0.05, 0.025, 0);
+                plateGroup.add(rice);
+                
+                // Кусочки курицы
+                for (let i = 0; i < 3; i++) {
+                    const angle = (i / 3) * Math.PI * 2;
+                    const chickenGeo = new THREE.BoxGeometry(0.04, 0.03, 0.05);
+                    const chickenMat = new THREE.MeshPhongMaterial({ color: 0xF4A460 });
+                    const chicken = new THREE.Mesh(chickenGeo, chickenMat);
+                    chicken.position.set(
+                        Math.cos(angle) * 0.08 - 0.05,
+                        0.03,
+                        Math.sin(angle) * 0.08
+                    );
+                    chicken.rotation.y = angle;
+                    chicken.castShadow = true;
+                    plateGroup.add(chicken);
+                }
+                
+                // Зелень
+                const greenGeo = new THREE.SphereGeometry(0.02, 6, 6);
+                greenGeo.scale(1, 0.5, 1);
+                const greenMat = new THREE.MeshPhongMaterial({ color: 0x32CD32 });
+                const green = new THREE.Mesh(greenGeo, greenMat);
+                green.position.set(0.1, 0.03, 0.08);
+                plateGroup.add(green);
+                
+            } else {
+                // Вариант 4: Салат с хлебом
+                // Салат (листья)
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i / 5) * Math.PI * 2;
+                    const leafGeo = new THREE.SphereGeometry(0.04, 8, 6);
+                    leafGeo.scale(1.5, 0.3, 1);
+                    const leafMat = new THREE.MeshPhongMaterial({ 
+                        color: i % 2 === 0 ? 0x90EE90 : 0xFF6347 
+                    });
+                    const leaf = new THREE.Mesh(leafGeo, leafMat);
+                    leaf.position.set(
+                        Math.cos(angle) * 0.06,
+                        0.025,
+                        Math.sin(angle) * 0.06
+                    );
+                    leaf.rotation.y = angle;
+                    plateGroup.add(leaf);
+                }
+                
+                // Кусочек хлеба
+                const breadGeo = new THREE.BoxGeometry(0.06, 0.03, 0.08);
+                const breadMat = new THREE.MeshPhongMaterial({ color: 0xD2691E });
+                const bread = new THREE.Mesh(breadGeo, breadMat);
+                bread.position.set(0.12, 0.025, 0);
+                bread.rotation.y = 0.3;
+                plateGroup.add(bread);
+            }
+            
+            plateGroup.position.set(posX, posY, posZ);
+            return plateGroup;
+        }
+        
+        // Создание чайника
+        function createTeapot(posX, posY, posZ) {
+            const teapotGroup = new THREE.Group();
+            
+            // Корпус чайника (увеличен)
+            const bodyGeo = new THREE.SphereGeometry(0.25, 16, 16);
+            bodyGeo.scale(1, 0.8, 1);
+            const bodyMat = new THREE.MeshPhongMaterial({ 
+                color: 0xC0C0C0,
+                shininess: 80,
+                metalness: 0.5
+            });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.2;
+            body.castShadow = true;
+            teapotGroup.add(body);
+            
+            // Крышка
+            const lidGeo = new THREE.CylinderGeometry(0.13, 0.16, 0.08, 16);
+            const lidMat = new THREE.MeshPhongMaterial({ 
+                color: 0xA9A9A9,
+                shininess: 70
+            });
+            const lid = new THREE.Mesh(lidGeo, lidMat);
+            lid.position.y = 0.36;
+            teapotGroup.add(lid);
+            
+            // Ручка крышки
+            const knobGeo = new THREE.SphereGeometry(0.035, 8, 8);
+            const knob = new THREE.Mesh(knobGeo, lidMat);
+            knob.position.y = 0.42;
+            teapotGroup.add(knob);
+            
+            // Носик
+            const spoutGeo = new THREE.CylinderGeometry(0.035, 0.05, 0.2, 8);
+            const spout = new THREE.Mesh(spoutGeo, bodyMat);
+            spout.position.set(0.25, 0.2, 0);
+            spout.rotation.z = -Math.PI / 4;
+            teapotGroup.add(spout);
+            
+            // Ручка
+            const handleGeo = new THREE.TorusGeometry(0.13, 0.025, 8, 16, Math.PI);
+            const handle = new THREE.Mesh(handleGeo, bodyMat);
+            handle.position.set(-0.2, 0.2, 0);
+            handle.rotation.y = Math.PI / 2;
+            teapotGroup.add(handle);
+            
+            teapotGroup.position.set(posX, posY, posZ);
+            return teapotGroup;
+        }
+        
+        // Создание кружки
+        function createMug(posX, posY, posZ, color = 0xFF6347) {
+            const mugGroup = new THREE.Group();
+            
+            // Корпус кружки (увеличен)
+            const bodyGeo = new THREE.CylinderGeometry(0.08, 0.075, 0.15, 12);
+            const bodyMat = new THREE.MeshPhongMaterial({ 
+                color: color,
+                shininess: 40
+            });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.075;
+            body.castShadow = true;
+            mugGroup.add(body);
+            
+            // Ручка кружки (увеличена)
+            const handleGeo = new THREE.TorusGeometry(0.055, 0.015, 8, 12, Math.PI);
+            const handleMat = new THREE.MeshPhongMaterial({ color: color });
+            const handle = new THREE.Mesh(handleGeo, handleMat);
+            handle.position.set(0.085, 0.075, 0);
+            handle.rotation.y = Math.PI / 2;
+            mugGroup.add(handle);
+            
+            // Жидкость внутри (чай/кофе)
+            const liquidGeo = new THREE.CylinderGeometry(0.075, 0.07, 0.03, 12);
+            const liquidMat = new THREE.MeshPhongMaterial({ 
+                color: 0x8B4513,
+                transparent: true,
+                opacity: 0.8
+            });
+            const liquid = new THREE.Mesh(liquidGeo, liquidMat);
+            liquid.position.y = 0.135;
+            mugGroup.add(liquid);
+            
+            mugGroup.position.set(posX, posY, posZ);
+            return mugGroup;
+        }
+        
+        // Создание баскетбольного мяча
+        function createBasketball(x, y, z) {
+            const geometry = new THREE.SphereGeometry(0.35, 16, 16);
+            const textureLoader = new THREE.TextureLoader();
+            const texture = textureLoader.load('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23FF8C00"/></svg>');
+            const material = new THREE.MeshPhongMaterial({ 
+                map: texture,
+                color: 0xFF8C00
+            });
+            
+            const ball = new THREE.Mesh(geometry, material);
+            ball.position.set(x, y, z);
+            ball.castShadow = true;
+            ball.receiveShadow = true;
+            
+            scene.add(ball);
+            basketballs.push(ball);
+            return ball;
+        }
+        
+        // Создание футбольного мяча
+        function createFootball(posX, posY, posZ) {
+            const ballGeo = new THREE.SphereGeometry(0.35, 16, 16);
+            const ballMat = new THREE.MeshPhongMaterial({ 
+                color: 0xFFFFFF,
+                shininess: 40
+            });
+            const ball = new THREE.Mesh(ballGeo, ballMat);
+            ball.position.set(posX, posY, posZ);
+            ball.castShadow = true;
+            ball.receiveShadow = true;
+            
+            // Черные пятиугольники на мяче
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                const pentagonGeo = new THREE.CircleGeometry(0.08, 5);
+                const pentagonMat = new THREE.MeshPhongMaterial({ color: 0x000000 });
+                const pentagon = new THREE.Mesh(pentagonGeo, pentagonMat);
+                pentagon.position.set(
+                    Math.cos(angle) * 0.25,
+                    Math.sin(angle) * 0.25,
+                    0.25
+                );
+                ball.add(pentagon);
+            }
+            
+            return ball;
+        }
+        
+        // Создание книжной полки
+        function createBookshelf(posX, posY, posZ, rotation = 0) {
+            const bookshelf = new THREE.Group();
+            
+            // Корпус полки
+            const frameGeo = new THREE.BoxGeometry(3, 2.5, 0.4);
+            const frameMat = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+            const frame = new THREE.Mesh(frameGeo, frameMat);
+            frame.castShadow = true;
+            bookshelf.add(frame);
+            
+            // Полки (горизонтальные доски)
+            const shelfMat = new THREE.MeshPhongMaterial({ color: 0x654321 });
+            for (let i = 0; i < 5; i++) {
+                const shelfGeo = new THREE.BoxGeometry(2.9, 0.05, 0.38);
+                const shelf = new THREE.Mesh(shelfGeo, shelfMat);
+                shelf.position.y = -1.2 + i * 0.6;
+                bookshelf.add(shelf);
+            }
+            
+            // Книги на полках
+            const bookColors = [
+                0x8B0000, 0x00008B, 0x006400, 0x8B008B, 
+                0xFF8C00, 0x4B0082, 0xDC143C, 0x2F4F4F,
+                0x8B4513, 0x483D8B, 0x2E8B57, 0xB8860B
+            ];
+            
+            for (let shelf = 0; shelf < 4; shelf++) {
+                const shelfY = -0.9 + shelf * 0.6;
+                const booksOnShelf = 8 + Math.floor(Math.random() * 4);
+                
+                for (let i = 0; i < booksOnShelf; i++) {
+                    const bookWidth = 0.08 + Math.random() * 0.12;
+                    const bookHeight = 0.25 + Math.random() * 0.15;
+                    const bookDepth = 0.3;
+                    
+                    const bookGeo = new THREE.BoxGeometry(bookWidth, bookHeight, bookDepth);
+                    const bookMat = new THREE.MeshPhongMaterial({ 
+                        color: bookColors[Math.floor(Math.random() * bookColors.length)],
+                        shininess: 20
+                    });
+                    const book = new THREE.Mesh(bookGeo, bookMat);
+                    
+                    book.position.set(
+                        -1.3 + (i * 0.25),
+                        shelfY + bookHeight / 2,
+                        0
+                    );
+                    
+                    // Небольшой наклон для реалистичности
+                    book.rotation.y = (Math.random() - 0.5) * 0.1;
+                    book.rotation.z = (Math.random() - 0.5) * 0.05;
+                    
+                    book.castShadow = true;
+                    bookshelf.add(book);
+                }
+            }
+            
+            bookshelf.position.set(posX, posY, posZ);
+            bookshelf.rotation.y = rotation;
+            return bookshelf;
+        }
+        
+        // Создание школы
+        function createSchool() {
+            const school = new THREE.Group();
+            
+            // Основное здание (2 этажа)
+            const building = new THREE.Mesh(
+                new THREE.BoxGeometry(30, 12, 25),
+                new THREE.MeshPhongMaterial({ color: 0xf0f0f0 })
+            );
+            building.position.y = 6;
+            building.castShadow = true;
+            building.receiveShadow = true;
+            school.add(building);
+
+            // Добавляем зону столкновений для основного здания
+            collisionZones.push({
+                x: 0,
+                z: 0,
+                width: 30,
+                depth: 25
+            });
+
+            // Основное здание 2 (2 этажа)
+            const building2 = new THREE.Mesh(
+                new THREE.BoxGeometry(20, 12, 25),
+                new THREE.MeshPhongMaterial({ color: 0xf0f0f0 })
+            );
+            building2.position.y = 6;
+            building2.position.x = -38;
+            building2.castShadow = true;
+            building2.receiveShadow = true;
+            school.add(building2);
+            
+            // Добавляем зону столкновений для второго здания
+            collisionZones.push({
+                x: -38,
+                z: 0,
+                width: 20,
+                depth: 25
+            });
+            
+            // Разноцветные вертикальные полосы
+            const stripeColors = [
+                0xFFA500, // Оранжевый
+                0x0000FF, // Синий
+                0xFF0000, // Красный
+                0x800080, // Фиолетовый
+                0xFFFF00  // Желтый
+            ];
+            
+            // Расположение полос на передней и задней стенах
+            for (let i = 0; i < 5; i++) {
+                // Передняя стена
+                const stripeFront = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.5, 12, 0.2),
+                    new THREE.MeshPhongMaterial({ color: stripeColors[i] })
+                );
+                stripeFront.position.set(-12 + i * 6, 6, 12.6);
+                school.add(stripeFront);
+                
+                // Задняя стена
+                const stripeBack = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.5, 12, 0.2),
+                    new THREE.MeshPhongMaterial({ color: stripeColors[i] })
+                );
+                stripeBack.position.set(-12 + i * 6, 6, -12.6);
+                school.add(stripeBack);
+            }
+            
+            // Разделительная линия между этажами
+            const floorLine = new THREE.Mesh(
+                new THREE.BoxGeometry(30.2, 0.2, 25.2),
+                new THREE.MeshPhongMaterial({ color: 0x808080 })
+            );
+            floorLine.position.y = 6;
+            school.add(floorLine);
+
+            // Разделительная линия между этажами (второе здание)
+            const floorLine2 = new THREE.Mesh(
+                new THREE.BoxGeometry(20.2, 0.2, 25.2),
+                new THREE.MeshPhongMaterial({ color: 0x808080 })
+            );
+            floorLine2.position.set(-38, 6, 0);
+            school.add(floorLine2);
+            
+            // Двускатная крыша
+            const roofPoints = [
+                new THREE.Vector2(-16, 0),
+                new THREE.Vector2(0, 4),
+                new THREE.Vector2(16, 0)
+            ];
+            
+            const roofShape = new THREE.Shape(roofPoints);
+            const roofGeometry = new THREE.ExtrudeGeometry(roofShape, {
+                depth: 27,
+                bevelEnabled: false,
+                steps: 1
+            });
+            
+            // Поворот и позиционирование крыши
+            roofGeometry.translate(0, 12, -13.5);
+            
+            const roof = new THREE.Mesh(
+                roofGeometry, 
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x8B0000,
+                    side: THREE.DoubleSide
+                })
+            );
+            school.add(roof);
+
+            // Двускатная крыша 2
+            const roofPoints2 = [
+                new THREE.Vector2(-15, 0),
+                new THREE.Vector2(0, 4),
+                new THREE.Vector2(15, 0)
+            ];
+            
+            const roofShape2 = new THREE.Shape(roofPoints2);
+            const roofGeometry2 = new THREE.ExtrudeGeometry(roofShape2, {
+                depth: 22,
+                bevelEnabled: false,
+                steps: 1
+            });
+
+            // Поворот и позиционирование крыши 2
+            roofGeometry2.translate(0, 12, -48.7);
+            roofGeometry2.rotateY(Math.PI / 2);
+            
+            const roof2 = new THREE.Mesh(
+                roofGeometry2, 
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x8B0000,
+                    side: THREE.DoubleSide
+                })
+            );
+            school.add(roof2);
+            
+            // Функция для создания окон
+            function createWindow(x, y, z, rotationY, width = 4, height = 2.5) {
+                const windowGroup = new THREE.Group();
+                
+                // Стекло
+                const glass = new THREE.Mesh(
+                    new THREE.BoxGeometry(width, height, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.7
+                    })
+                );
+                windowGroup.add(glass);
+                
+                // Рама
+                const frameMaterial = new THREE.MeshPhongMaterial({ color: 0x3A9F7F });
+                const verticalFrame = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, height, 0.2),
+                    frameMaterial
+                );
+                windowGroup.add(verticalFrame);
+                
+                const horizontalFrame = new THREE.Mesh(
+                    new THREE.BoxGeometry(width, 0.2, 0.2),
+                    frameMaterial
+                );
+                horizontalFrame.position.y = height/2;
+                windowGroup.add(horizontalFrame);
+                
+                const horizontalFrame2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(width, 0.2, 0.2),
+                    frameMaterial
+                );
+                horizontalFrame2.position.y = -height/2;
+                windowGroup.add(horizontalFrame2);
+                
+                windowGroup.position.set(x, y, z);
+                windowGroup.rotation.y = rotationY;
+                
+                return windowGroup;
+            }
+            
+            // Окна первого этажа (передняя стена)
+            for (let x = -12; x <= 12; x += 6) {
+                school.add(createWindow(x, 3, 12.7, 0));
+            }
+            
+            // Окна второго этажа (передняя стена)
+            for (let x = -12; x <= 12; x += 6) {
+                school.add(createWindow(x, 9, 12.7, 0));
+            }
+            
+            // Окна первого этажа (задняя стена)
+            for (let x = -12; x <= 12; x += 6) {
+                school.add(createWindow(x, 3, -12.7, Math.PI));
+            }
+            
+            // Окна второго этажа (задняя стена)
+            for (let x = -12; x <= 12; x += 6) {
+                school.add(createWindow(x, 9, -12.7, Math.PI));
+            }
+            
+            // Окна первого этажа (левая стена)
+            for (let z = -9; z <= 9; z += 6) {
+                school.add(createWindow(-15.1, 3, z, Math.PI/2, 3, 2.5));
+            }
+            
+            // Окна второго этажа (левая стена)
+            for (let z = -9; z <= 9; z += 6) {
+                school.add(createWindow(-15.1, 9, z, Math.PI/2, 3, 2.5));
+            }
+            
+            // Окна первого этажа (правая стена)
+            for (let z = -9; z <= 9; z += 6) {
+                school.add(createWindow(15.1, 3, z, -Math.PI/2, 3, 2.5));
+            }
+            
+            // Окна второго этажа (правая стена)
+            for (let z = -9; z <= 9; z += 6) {
+                school.add(createWindow(15.1, 9, z, -Math.PI/2, 3, 2.5));
+            }
+            
+
+            // Окна второго здания (передняя стена)
+            for (let x = -8; x <= 8; x += 5) {
+                school.add(createWindow(x - 38, 3, 12.7, 0, 3, 2.5));
+                school.add(createWindow(x - 38, 9, 12.7, 0, 3, 2.5));
+            }
+            
+            // Окна второго здания (задняя стена)
+            for (let x = -8; x <= 8; x += 5) {
+                school.add(createWindow(x - 38, 3, -12.7, Math.PI, 3, 2.5));
+                school.add(createWindow(x - 38, 9, -12.7, Math.PI, 3, 2.5));
+            }
+            
+            // Окна второго здания (правая стена)
+            for (let z = -9; z <= 9; z += 6) {
+                school.add(createWindow(-27.9, 3, z, Math.PI/2, 3, 2.5));
+                school.add(createWindow(-27.9, 9, z, Math.PI/2, 3, 2.5));
+            }
+            
+            // Окна второго здания (левая стена)
+            for (let z = -9; z <= 9; z += 6) {
+                school.add(createWindow(-48.1, 3, z, -Math.PI/2, 3, 2.5));
+                school.add(createWindow(-48.1, 9, z, -Math.PI/2, 3, 2.5));
+            }
+
+            // Входная группы
+            const entrance = new THREE.Group();
+            
+            const entranceBase = new THREE.Mesh(
+                new THREE.BoxGeometry(8, 5, 5),
+                new THREE.MeshPhongMaterial({ color: 0xf0f0f0 })
+            );
+            entranceBase.position.set(0, 2.5, 12.5);
+            entrance.add(entranceBase);
+            
+            // Добавляем зону столкновений для входа
+            collisionZones.push({
+                x: 0,
+                z: 12.5,
+                width: 8,
+                depth: 5
+            });
+            
+            const door = new THREE.Mesh(
+                new THREE.BoxGeometry(2.5, 3.5, 0.2),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            door.position.set(0, 1.75, 15.1);
+            door.userData.isDoor = true; // Помечаем дверь для взаимодействия
+            entrance.add(door);
+
+            // Добавляем ручку двери
+            const doorHandle = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8),
+                new THREE.MeshPhongMaterial({ color: 0xCCCCCC })
+            );
+            doorHandle.rotation.z = Math.PI / 2; // Поворачиваем горизонтально
+            doorHandle.position.set(0.8, 1.75, 15.2); // Справа от центра двери
+            entrance.add(doorHandle);
+            
+            school.add(entrance);
+            
+            // Лестничная клетка сбоку
+            const stairwell = new THREE.Mesh(
+                new THREE.BoxGeometry(20, 6, 6),
+                new THREE.MeshPhongMaterial({ color: 0xf0f0f0 })
+            );
+            stairwell.position.set(-18, 3, 0);
+            school.add(stairwell);
+            
+            // Добавляем зону столкновений для лестничной клетки
+            collisionZones.push({
+                x: -18,
+                z: 0,
+                width: 20,
+                depth: 6
+            });
+            
+            // Окна лестничной клетки на передней и задней стенках
+            // Высокие узкие окна
+            const createStairWindow = (x, y, z, rotationY) => {
+                const windowGroup = new THREE.Group();
+                
+                // Стекло
+                const glass = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 3, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.7
+                    })
+                );
+                windowGroup.add(glass);
+                
+                // Рама
+                const frameMaterial = new THREE.MeshPhongMaterial({ color: 0x3A9F7F });
+                
+                // Вертикальные элементы рама
+                const verticalFrame1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 3, 0.2),
+                    frameMaterial
+                );
+                verticalFrame1.position.set(-1.4, 0, 0);
+                windowGroup.add(verticalFrame1);
+                
+                const verticalFrame2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 3, 0.2),
+                    frameMaterial
+                );
+                verticalFrame2.position.set(1.4, 0, 0);
+                windowGroup.add(verticalFrame2);
+                
+                // Горизонтальные элементы рамы
+                const horizontalFrame1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 0.2, 0.2),
+                    frameMaterial
+                );
+                horizontalFrame1.position.set(0, 1.5, 0);
+                windowGroup.add(horizontalFrame1);
+
+                const horizontalFrame2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 0.2, 0.2),
+                    frameMaterial
+                );
+                horizontalFrame2.position.set(0, -1.5, 0);
+                windowGroup.add(horizontalFrame2);
+                
+                windowGroup.position.set(x, y, z);
+                windowGroup.rotation.y = rotationY;
+                
+                return windowGroup;
+            };
+            
+            // Передняя стена лестничной клетки (положительное Z)
+            for (let x = -24.9; x <= -12; x += 6) {
+                // Первый уровень
+                school.add(createStairWindow(x, 3, 3.1, 0));
+            }
+            
+            // Задняя стена лестничной клетки (отрицательное Z)
+            for (let x = -24.9; x <= -12; x += 6) {
+                // Первый уровень
+                school.add(createStairWindow(x, 3, -3.1, Math.PI));
+            }
+            
+            // Флагшток
+            const flagPole = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 8, 8),
+                new THREE.MeshPhongMaterial({ color: 0xC0C0C0 })
+            );
+            flagPole.position.set(13, 13, -10);
+            school.add(flagPole);
+            
+            // Флаг России (триколор)
+            const flagGroup = new THREE.Group();
+            
+            // Белая полоса
+            const whiteStripe = new THREE.Mesh(
+                new THREE.PlaneGeometry(3, 0.66),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0xFFFFFF,
+                    side: THREE.DoubleSide 
+                })
+            );
+            whiteStripe.position.y = 0.66;
+            flagGroup.add(whiteStripe);
+            
+            // Синяя полоса
+            const blueStripe = new THREE.Mesh(
+                new THREE.PlaneGeometry(3, 0.66),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x0000FF,
+                    side: THREE.DoubleSide 
+                })
+            );
+            blueStripe.position.y = 0;
+            flagGroup.add(blueStripe);
+            
+            // Красная полоса
+            const redStripe = new THREE.Mesh(
+                new THREE.PlaneGeometry(3, 0.66),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0xFF0000,
+                    side: THREE.DoubleSide 
+                })
+            );
+            redStripe.position.y = -0.66;
+            flagGroup.add(redStripe);
+            
+            flagGroup.position.set(14.5, 16, -10);
+            school.add(flagGroup);
+            
+            return school;
+        }
+        
+        // Создание территории
+        function createEnvironment() {
+            const env = new THREE.Group();
+            
+            // Увеличиваем размер карты
+            const mapSize = 200;
+            
+            // Основной газон с текстурой (более темный оттенок)
+            const textureLoader = new THREE.TextureLoader();
+            const ground = new THREE.Mesh(
+                new THREE.PlaneGeometry(mapSize, mapSize, 100),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x038500,
+                    side: THREE.DoubleSide
+                })
+            );
+            ground.position.set(0, -0.01, 0);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            env.add(ground);
+            
+            // Дорожки
+            const pathMaterial = new THREE.MeshPhongMaterial({ color: 0xA9A9A9 });
+            
+            const mainPath = new THREE.Mesh(
+                new THREE.BoxGeometry(10, 0.01, mapSize),
+                pathMaterial
+            );
+            mainPath.position.set(0, 0.1, 0);
+            env.add(mainPath);
+            
+            // Добавляем зону запрета для деревьев (главная дорожка)
+            noTreeZones.push({
+                x: 0,
+                z: 0,
+                width: 10,
+                depth: mapSize
+            });
+            
+            const crossPath = new THREE.Mesh(
+                new THREE.BoxGeometry(mapSize, 0.01, 8),
+                pathMaterial
+            );
+            crossPath.position.set(0, 0.1, 15);
+            env.add(crossPath);
+            
+            // Добавляем зону запрета для деревьев (поперечная дорожка)
+            noTreeZones.push({
+                x: 0,
+                z: 15,
+                width: mapSize,
+                depth: 8
+            });
+            
+            // Круговая дорожка вокруг всех зданий (узкая и непрерывная)
+            const circularPath = createCircularPath();
+            env.add(circularPath);
+            
+            // Спортивная площадка
+            const playground = new THREE.Mesh(
+                new THREE.BoxGeometry(35, 0.01, 25),
+                new THREE.MeshPhongMaterial({ color: 0x2E8B57 })
+            );
+            playground.position.set(32.5, 0.05, 0);
+            playground.receiveShadow = true;
+            env.add(playground);
+            
+            // Добавляем зону запрета для деревьев (спортивная площадка)
+            noTreeZones.push({
+                x: 32.5,
+                z: 0,
+                width: 35,
+                depth: 25
+            });
+            
+            // Ворота на спортивную площадку
+            const playgroundGate = createPlaygroundGate();
+            env.add(playgroundGate);
+
+            // Вторые ворота на спортивную площадку
+            const playgroundGate2 = createPlaygroundGate2();
+            env.add(playgroundGate2);
+            
+            // Разметка баскетбольной площадки
+            const courtMarkingMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+            
+            // Центральный крут
+            const centerCircle = new THREE.Mesh(
+                new THREE.RingGeometry(2, 2.2, 32),
+                courtMarkingMaterial
+            );
+            centerCircle.rotation.x = -Math.PI / 2;
+            centerCircle.position.set(32.5, 0.06, 0);
+            env.add(centerCircle);
+            
+            // Линии площадки
+            const lineGeometry = new THREE.BoxGeometry(0.2, 0.01, 25);
+            const courtLine = new THREE.Mesh(lineGeometry, courtMarkingMaterial);
+            courtLine.position.set(32.5, 0.06, 0);
+            env.add(courtLine);
+            
+            // Баскетбольные стойки
+            const createBasket = (x, z) => {
+                const basket = new THREE.Group();
+                
+                const pole = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.3, 0.3, 3, 8),
+                    new THREE.MeshPhongMaterial({ color: 0xC0C0C0 })
+                );
+                pole.position.y = 1.5;
+                basket.add(pole);
+                
+                const board = new THREE.Mesh(
+                    new THREE.BoxGeometry(2, 1.8, 0.1),
+                    new THREE.MeshPhongMaterial({ color: 0x1E90FF })
+                );
+                board.position.set(0, 3, 0.4);
+                basket.add(board);
+                
+                const ring = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.4, 0.05, 8, 20),
+                    new THREE.MeshPhongMaterial({ color: 0xFF4500 })
+                );
+                ring.rotation.x = Math.PI / 2;
+                ring.position.set(0, 3, 0.9);
+                basket.add(ring);
+                
+                // Сетка для кольца
+                const netGeometry = new THREE.CylinderGeometry(0.4, 0.3, 0.5, 8, 1, true);
+                const netMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0xFFFFFF,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const net = new THREE.Mesh(netGeometry, netMaterial);
+                net.position.set(0, 2.75, 0.9);
+                basket.add(net);
+                
+                basket.position.set(x, 0, z);
+                
+                // Добавляем зону столкновений для баскетбольных стоек
+                collisionZones.push({
+                    x: x,
+                    z: z,
+                    width: 1,
+                    depth: 1
+                });
+                
+                return basket;
+            };
+            
+            env.add(createBasket(24, -10));
+            env.add(createBasket(41, -10));
+
+            // Создаем баскетбольные мячи на площадке снаружи
+            env.add(createBasketball(30, 0.4, -8));
+            env.add(createBasketball(33, 0.4, -4));
+            env.add(createBasketball(35, 0.4, 2));
+            
+            // Пруд за баскетбольной площадкой (увеличенный и сдвинутый дальше назад)
+            const pond = new THREE.Group();
+            
+            // Вода пруда (овальная форма, увеличена)
+            const waterGeo = new THREE.CylinderGeometry(12, 12, 0.3, 32);
+            waterGeo.scale(1.3, 1, 1);
+            const waterMat = new THREE.MeshPhongMaterial({ 
+                color: 0x4A90E2,
+                transparent: true,
+                opacity: 0.7,
+                shininess: 100
+            });
+            const water = new THREE.Mesh(waterGeo, waterMat);
+            water.position.set(32.5, 0.15, -35);
+            water.receiveShadow = true;
+            pond.add(water);
+            
+            // Берег пруда (кольцо вокруг воды)
+            const bankGeo = new THREE.RingGeometry(12, 14, 32);
+            bankGeo.scale(1.3, 1, 1);
+            const bankMat = new THREE.MeshPhongMaterial({ 
+                color: 0x8B7355,
+                side: THREE.DoubleSide
+            });
+            const bank = new THREE.Mesh(bankGeo, bankMat);
+            bank.rotation.x = -Math.PI / 2;
+            bank.position.set(32.5, 0.05, -35);
+            pond.add(bank);
+            
+            // Камни вокруг пруда
+            const stonePositions = [
+                { x: 32.5, z: -22 }, { x: 40, z: -26 }, { x: 46, z: -32 },
+                { x: 44, z: -42 }, { x: 36, z: -47 }, { x: 28, z: -46 },
+                { x: 20, z: -40 }, { x: 19, z: -30 }, { x: 24, z: -24 }
+            ];
+            
+            stonePositions.forEach(pos => {
+                const stoneSize = 0.3 + Math.random() * 0.4;
+                const stoneGeo = new THREE.SphereGeometry(stoneSize, 8, 8);
+                stoneGeo.scale(1, 0.6, 1.2);
+                const stoneMat = new THREE.MeshPhongMaterial({ 
+                    color: 0x808080
+                });
+                const stone = new THREE.Mesh(stoneGeo, stoneMat);
+                stone.position.set(pos.x, 0.2, pos.z);
+                stone.rotation.set(
+                    Math.random() * 0.3,
+                    Math.random() * Math.PI * 2,
+                    Math.random() * 0.3
+                );
+                stone.castShadow = true;
+                pond.add(stone);
+            });
+            
+            // Кувшинки на воде
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const radius = 4 + Math.random() * 5;
+                
+                // Лист кувшинки
+                const lilyPadGeo = new THREE.CircleGeometry(0.4, 16);
+                const lilyPadMat = new THREE.MeshPhongMaterial({ 
+                    color: 0x2E8B57,
+                    side: THREE.DoubleSide
+                });
+                const lilyPad = new THREE.Mesh(lilyPadGeo, lilyPadMat);
+                lilyPad.rotation.x = -Math.PI / 2;
+                lilyPad.position.set(
+                    32.5 + Math.cos(angle) * radius,
+                    0.32,
+                    -35 + Math.sin(angle) * radius
+                );
+                pond.add(lilyPad);
+                
+                // Цветок кувшинки (не на всех листьях)
+                if (i % 2 === 0) {
+                    const flowerGeo = new THREE.SphereGeometry(0.1, 8, 8);
+                    const flowerMat = new THREE.MeshPhongMaterial({ 
+                        color: i % 4 === 0 ? 0xFFFFFF : 0xFFB6C1
+                    });
+                    const flower = new THREE.Mesh(flowerGeo, flowerMat);
+                    flower.position.set(
+                        32.5 + Math.cos(angle) * radius,
+                        0.38,
+                        -35 + Math.sin(angle) * radius
+                    );
+                    pond.add(flower);
+                }
+            }
+            
+            // Камыши по краям пруда
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                const radius = 12.5;
+                
+                const reedGeo = new THREE.CylinderGeometry(0.03, 0.04, 1.5, 6);
+                const reedMat = new THREE.MeshPhongMaterial({ color: 0x6B8E23 });
+                const reed = new THREE.Mesh(reedGeo, reedMat);
+                reed.position.set(
+                    32.5 + Math.cos(angle) * radius * 1.3,
+                    0.75,
+                    -35 + Math.sin(angle) * radius
+                );
+                reed.rotation.z = (Math.random() - 0.5) * 0.2;
+                reed.castShadow = true;
+                pond.add(reed);
+                
+                // Верхушка камыша
+                const topGeo = new THREE.CylinderGeometry(0.08, 0.03, 0.3, 6);
+                const topMat = new THREE.MeshPhongMaterial({ color: 0x8B7355 });
+                const top = new THREE.Mesh(topGeo, topMat);
+                top.position.set(
+                    32.5 + Math.cos(angle) * radius * 1.3,
+                    1.65,
+                    -35 + Math.sin(angle) * radius
+                );
+                pond.add(top);
+            }
+            
+            env.add(pond);
+            
+            // Добавляем зону запрета для деревьев (пруд)
+            noTreeZones.push({
+                x: 32.5,
+                z: -35,
+                width: 32,
+                depth: 28
+            });
+            
+            // Хвойные деревья (как были раньше)
+            const createConiferousTree = (x, z) => {
+                const tree = new THREE.Group();
+                
+                const trunk = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.8, 0.8, 4, 8),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                trunk.position.y = 2;
+                
+                const crown = new THREE.Mesh(
+                    new THREE.ConeGeometry(4, 8, 8),
+                    new THREE.MeshPhongMaterial({ color: 0x228B22 })
+                );
+                crown.position.y = 7;
+                
+                tree.add(trunk);
+                tree.add(crown);
+                tree.position.set(x, 0, z);
+                
+                // Добавляем зону столкновений для дерева
+                collisionZones.push({
+                    x: x,
+                    z: z,
+                    width: 5,
+                    depth: 5
+                });
+                
+                return tree;
+            };
+            
+            // Лиственные деревья (увеличенные)
+            const createDeciduousTree = (x, z) => {
+                const tree = new THREE.Group();
+                
+                const trunk = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.8, 0.8, 4, 8),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                trunk.position.y = 2;
+                
+                const crown = new THREE.Mesh(
+                    new THREE.SphereGeometry(4, 8, 8),
+                    new THREE.MeshPhongMaterial({ color: 0x228B22 })
+                );
+                crown.position.y = 7;
+                
+                tree.add(trunk);
+                tree.add(crown);
+                tree.position.set(x, 0, z);
+                
+                // Добавляем зону столкновений для дерева
+                collisionZones.push({
+                    x: x,
+                    z: z,
+                    width: 6,
+                    depth: 6
+                });
+                
+                return tree;
+            };
+            
+            // Случайно размещаем деревья, избегая запретных зон
+            const totalTrees = 40;
+            for (let i = 0; i < totalTrees; i++) {
+                let x, z;
+                let attempts = 0;
+                
+                do {
+                    x = (Math.random() - 0.5) * (mapSize - 20);
+                    z = (Math.random() - 0.5) * (mapSize - 20);
+                    attempts++;
+                } while ((checkAnyCollision(x, z, 4) || isInNoTreeZone(x, z, 4)) && attempts < 100);
+                
+                if (attempts < 100) {
+                    // Чередуем хвойные и лиственные деревья
+                    if (i % 2 === 0) {
+                        env.add(createConiferousTree(x, z));
+                    } else {
+                        env.add(createDeciduousTree(x, z));
+                    }
+                }
+            }
+            
+            // Скамейки
+            const createBench = (x, z, rotation) => {
+                const bench = new THREE.Group();
+                
+                const seat = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 0.2, 1),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                seat.position.y = 0.5;
+                bench.add(seat);
+                
+                const back = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 1, 0.1),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                back.position.set(0, 1, -0.5);
+                bench.add(back);
+                
+                const leg1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.5, 0.2),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                leg1.position.set(-1.3, 0.25, 0.4);
+                bench.add(leg1);
+                
+                const leg2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.5, 0.2),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                leg2.position.set(1.3, 0.25, 0.4);
+                bench.add(leg2);
+
+                const leg3 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.5, 0.2),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                leg3.position.set(-1.3, 0.25, -0.4);
+                bench.add(leg3);
+                
+                const leg4 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.5, 0.2),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                leg4.position.set(1.3, 0.25, -0.4);
+                bench.add(leg4);
+                
+                bench.position.set(x, 0, z);
+                bench.rotation.y = rotation;
+                
+                // Добавляем зону столкновений для скамейки
+                collisionZones.push({
+                    x: x,
+                    z: z,
+                    width: 3,
+                    depth: 1
+                });
+                
+                return bench;
+            };
+            
+            // Расставляем лавочки
+            env.add(createBench(-10.9, 27, Math.PI/2));
+            env.add(createBench(10, 27, -Math.PI/2));
+            env.add(createBench(11, -35, Math.PI/2));
+            env.add(createBench(32.4, -18, Math.PI));
+            
+            // Добавляем дополнительные детали на увеличенной территории
+            const createFlowerBed = (x, z) => {
+                const flowerBed = new THREE.Group();
+                
+                const bed = new THREE.Mesh(
+                    new THREE.CylinderGeometry(2, 2, 0.3, 16),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                bed.position.y = 0.15;
+                flowerBed.add(bed);
+                
+                // Цветы
+                const flowerColors = [0xFF0000, 0xFFFF00, 0xFF00FF, 0x00FF00];
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const flower = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.2, 8, 8),
+                        new THREE.MeshPhongMaterial({ 
+                            color: flowerColors[i % flowerColors.length] 
+                        })
+                    );
+                    flower.position.set(
+                        Math.cos(angle) * 1.2,
+                        0.4,
+                        Math.sin(angle) * 1.2
+                    );
+                    flowerBed.add(flower);
+                }
+                
+                flowerBed.position.set(x, 0, z);
+                return flowerBed;
+            };
+            
+            // Добавляем клумбы
+            env.add(createFlowerBed(20, 35));
+            env.add(createFlowerBed(-20, 35));
+            // env.add(createFlowerBed(30, -35));
+            env.add(createFlowerBed(-30, -35));
+
+            // Добавляем детали на траву (цветы и камни)
+            const details = new THREE.Group();
+            
+            // Функция для создания цветка
+            function createFlower(x, z) {
+                const flower = new THREE.Group();
+                
+                // Стебель
+                const stem = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8),
+                    new THREE.MeshPhongMaterial({ color: 0x00FF00 })
+                );
+                stem.position.y = 0.15;
+                flower.add(stem);
+
+                // Цветок (например, ромашка)
+                const center = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 8, 8),
+                    new THREE.MeshPhongMaterial({ color: 0xFFFF00 })
+                );
+                center.position.y = 0.3;
+                flower.add(center);
+
+                // Лепестки (6 штук)
+                const petalMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+                for (let i = 0; i < 6; i++) {
+                    const petal = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.08, 8, 8),
+                        petalMaterial
+                    );
+                    petal.scale.set(2, 0.5, 1);
+                    petal.position.y = 0.3;
+                    petal.rotation.y = (i / 6) * Math.PI * 2;
+                    petal.position.x = 0.15 * Math.cos(petal.rotation.y);
+                    petal.position.z = 0.15 * Math.sin(petal.rotation.y);
+                    flower.add(petal);
+                }
+
+                flower.position.set(x, 0, z);
+                flower.rotation.y = Math.random() * Math.PI * 2; // Случайный поворот
+
+                return flower;
+            }
+            
+            // Функция для создания камня
+            function createStone(x, z) {
+                const stone = new THREE.Mesh(
+                    new THREE.DodecahedronGeometry(0.2, 0),
+                    new THREE.MeshPhongMaterial({ color: 0x808080 })
+                );
+                stone.position.set(x, 0.1, z);
+                stone.rotation.x = Math.random() * Math.PI;
+                stone.rotation.y = Math.random() * Math.PI;
+                stone.rotation.z = Math.random() * Math.PI;
+                return stone;
+            }
+            
+            // Создаем 200 цветов
+            for (let i = 0; i < 200; i++) {
+                let x, z;
+                let validPosition = false;
+                let attempts = 0;
+                
+                while (!validPosition && attempts < 200) {
+                    x = Math.random() * 200 - 100;
+                    z = Math.random() * 200 - 100;
+                    
+                    // Проверяем, не находится ли позиция на запретной зоне или внутри здания
+                    if (!checkAnyCollision(x, z, 0.5) && !isInNoTreeZone(x, z, 0.5)) {
+                        validPosition = true;
+                    }
+                    attempts++;
+                }
+                
+                if (validPosition) {
+                    const flower = createFlower(x, z);
+                    details.add(flower);
+                }
+            }
+            
+            // Создаем 30 камней
+            for (let i = 0; i < 30; i++) {
+                let x, z;
+                let validPosition = false;
+                let attempts = 0;
+                
+                while (!validPosition && attempts < 30) {
+                    x = Math.random() * 200 - 100;
+                    z = Math.random() * 200 - 100;
+                    
+                    // Проверяем, не находится ли позиция на запретной зоне или внутри здания
+                    if (!checkAnyCollision(x, z, 0.5) && !isInNoTreeZone(x, z, 0.5)) {
+                        validPosition = true;
+                    }
+                    attempts++;
+                }
+                
+                if (validPosition) {
+                    const stone = createStone(x, z);
+                    details.add(stone);
+                }
+            }
+            
+            env.add(details);
+            
+            return env;
+        }
+        
+        // Создание круговой дорожки вокруг всех зданий (узкая и непрерывная)
+        function createCircularPath() {
+            const pathGroup = new THREE.Group();
+            
+            // Создаем круговую дорожку из сегментов
+            const pathMaterial = new THREE.MeshPhongMaterial({ color: 0x3caa3c });
+            const pathWidth = 4; // Уже дорожка
+            const radius = 70; // Радиус как в предыдущих версиях
+            
+            // Создаем 24 сегмента для более плавного круга
+            for (let i = 0; i < 25; i++) {
+                const angle = (i / 25) * Math.PI * 2;
+                const nextAngle = ((i + 1) / 25) * Math.PI * 2;
+                
+                const segment = new THREE.Mesh(
+                    new THREE.PlaneGeometry(
+                        pathWidth, 
+                        (Math.PI * 2 * radius) / 25
+                    ),
+                    pathMaterial
+                );
+                
+                // Позиционируем сегмент по кругу
+                segment.position.set(
+                    Math.cos(angle) * radius,
+                    0.01,
+                    Math.sin(angle) * radius
+                );
+                
+                // Поворачиваем сегмент по касательной к окружности
+                segment.rotation.x = -Math.PI / 2;
+                segment.rotation.z = -angle;
+                
+                pathGroup.add(segment);
+                
+                // Добавляем зону запрета для деревьев (круговая дорожка)
+                noTreeZones.push({
+                    x: Math.cos(angle) * radius,
+                    z: Math.sin(angle) * radius,
+                    width: pathWidth,
+                    depth: (Math.PI * 2 * radius) / 25
+                });
+            }
+            
+            return pathGroup;
+        }
+        
+        // Создание ворот на спортивную площадку
+        function createPlaygroundGate() {
+            const gateGroup = new THREE.Group();
+            
+            const gateMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+            
+            // Левая стойка ворот
+            const leftPost = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.2, 2, 8),
+                gateMaterial
+            );
+            leftPost.position.set(16, 1, -11);
+            gateGroup.add(leftPost);
+            
+            // Правая стойка ворот
+            const rightPost = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.2, 2, 8),
+                gateMaterial
+            );
+            rightPost.position.set(16, 1, -15);
+            gateGroup.add(rightPost);
+            
+            // Перекладина ворот
+            const crossbar = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.15, 0.15, 5, 8),
+                gateMaterial
+            );
+            crossbar.position.set(16, 2, -13);
+            crossbar.rotation.z = Math.PI / 2;
+            crossbar.rotation.y = Math.PI / 2;
+            gateGroup.add(crossbar);
+            
+            gateGroup.position.set(32.5, 0, 12.5);
+            
+            return gateGroup;
+        }
+
+        // Создание вторых ворот на спортивную площадку
+        function createPlaygroundGate2() {
+            const gateGroup2 = new THREE.Group();
+            
+            const gateMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+            
+            // Левая стойка ворот
+            const leftPost2 = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.2, 2, 8),
+                gateMaterial
+            );
+            leftPost2.position.set(18, 1, -2);
+            gateGroup2.add(leftPost2);
+            
+            // Правая стойка ворот
+            const rightPost2 = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.2, 2, 8),
+                gateMaterial
+            );
+            rightPost2.position.set(18, 1, 2);
+            gateGroup2.add(rightPost2);
+            
+            // Перекладина ворот
+            const crossbar2 = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.15, 0.15, 5, 8),
+                gateMaterial
+            );
+            crossbar2.position.set(18, 2, 0);
+            crossbar2.rotation.z = Math.PI / 2;
+            crossbar2.rotation.y = Math.PI / 2;
+            gateGroup2.add(crossbar2);
+            
+            return gateGroup2;
+        }
+
+        // Создание внутренних помещений школы (первый этаж)
+        function createSchoolInterior() {
+            const interior = new THREE.Group();
+            
+            // Внутренние стены
+            const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xF5F5DC });
+            
+            // Пол первого этажа 
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(28, 0.2, 23),
+                new THREE.MeshPhongMaterial({ color: 0xb34e29 })
+            );
+            floor.position.set(0, -0.09, 0);
+            interior.add(floor);
+            
+            // Потолок первого этажа 
+            const ceiling = new THREE.Mesh(
+                new THREE.BoxGeometry(28, 0.2, 23),
+                new THREE.MeshPhongMaterial({ color: 0xF5F5DC })
+            );
+            ceiling.position.set(0, 6, 0);
+            interior.add(ceiling);
+            
+            // Стены коридора
+            const corridorWall1 = new THREE.Mesh(
+                new THREE.BoxGeometry(28, 6, 0.2),
+                wallMaterial
+            );
+            corridorWall1.position.set(0, 3, 11.5);
+            interior.add(corridorWall1);
+            interiorWalls.push({x: 0, z: 11.5, width: 28, depth: 0.2});
+            
+            const corridorWall2 = new THREE.Mesh(
+                new THREE.BoxGeometry(28, 6, 0.2),
+                wallMaterial
+            );
+            corridorWall2.position.set(0, 3, -11.5);
+            interior.add(corridorWall2);
+            interiorWalls.push({x: 0, z: -11.5, width: 28, depth: 0.2});
+            
+            // Перегородки между классами
+            const partition1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 6, 23),
+                wallMaterial
+            );
+            partition1.position.set(13.9, 3, 0);
+            interior.add(partition1);
+            interiorWalls.push({x: 13.9, z: 0, width: 0.2, depth: 23});
+            
+            const partition2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 6, 23),
+                wallMaterial
+            );
+            partition2.position.set(-13.9, 3, 0);
+            interior.add(partition2);
+            interiorWalls.push({x: -13.9, z: 0, width: 0.2, depth: 23});
+            
+            // Лестница на второй этаж 
+            const stairs = createStairs();
+            stairs.position.set(-4, 0, -9); 
+            stairs.rotation.y = Math.PI / 2;
+            stairs.userData.isStairs = true;
+            interior.add(stairs);
+            
+            // Входная дверь изнутри
+            const interiorDoor = new THREE.Mesh(
+                new THREE.BoxGeometry(2.5, 3.5, 0.2),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            interiorDoor.position.set(0, 1.75, 11.2);
+            interiorDoor.userData.isInteriorDoor = true;
+            interior.add(interiorDoor);
+
+            // Добавляем ручку для внутренней двери
+            const interiorDoorHandle = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8),
+                new THREE.MeshPhongMaterial({ color: 0xCCCCCC })
+            );
+            interiorDoorHandle.rotation.z = Math.PI / 2; // Поворачиваем горизонтально
+            interiorDoorHandle.position.set(0.8, 1.75, 11); // Справа от центра двери
+            interior.add(interiorDoorHandle);
+            
+            // Дверь во второй корпус
+            const secondBuildingDoor = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 3.5, 0.2),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            secondBuildingDoor.rotation.y = Math.PI / 2;
+            secondBuildingDoor.position.set(-13.8, 1.75, -0.05);
+            secondBuildingDoor.userData.isSecondBuildingDoor = true;
+            interior.add(secondBuildingDoor);
+
+            // Ручка двери во второй корпус
+            const secondBuildingDoorHandle = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8),
+                new THREE.MeshPhongMaterial({ color: 0xCCCCCC })
+            );
+            secondBuildingDoorHandle.rotation.z = Math.PI / 2;
+            secondBuildingDoorHandle.position.set(-13.75, 1.75, 0.7);
+            interior.add(secondBuildingDoorHandle);
+            
+            // Класс 1 (правый)
+            const class1 = createClassroom(7, 0, 0xE6E6FA);
+            interior.add(class1);
+            
+            // Класс 2 (левый) 
+            const class2 = createClassroom(-7, 0, 0xE6FAE6);
+            interior.add(class2);
+            
+            // Добавляем зоны столкновений для коридоров
+            addCorridorCollisionZones();
+            
+            // Добавляем комнатные растения в коридор первого этажа - размещаем в углах коридора
+            interior.add(createIndoorPlant(-12, -0.5, 9, 0.9));  // Левый дальний угол
+            interior.add(createIndoorPlant(12, -0.5, 9, 0.9));   // Правый дальний угол
+            interior.add(createIndoorPlant(-12, -0.5, -9, 0.9)); // Левый ближний угол
+            interior.add(createIndoorPlant(12, -0.5, -9, 0.9));  // Правый ближний угол
+            
+            // Равномерное освещение в коридоре первого этажа
+            const corridorLight = new THREE.HemisphereLight(0xffffee, 0xffffff, 0.001);
+            corridorLight.position.set(0, 5, 0);
+            interior.add(corridorLight);
+            
+            // Потолочные светильники для равномерного освещения (расширенная сетка)
+            const ceilingLights = [
+                // Центральный ряд
+                { x: -10, z: 0 }, { x: -5, z: 0 }, { x: 0, z: 0 }, { x: 5, z: 0 }, { x: 10, z: 0 },
+                // Передний ряд
+                { x: -10, z: 8 }, { x: -5, z: 8 }, { x: 0, z: 8 }, { x: 5, z: 8 }, { x: 10, z: 8 },
+                // Задний ряд
+                { x: -10, z: -8 }, { x: -5, z: -8 }, { x: 0, z: -8 }, { x: 5, z: -8 }, { x: 10, z: -8 },
+                // Промежуточные ряды
+                { x: -10, z: 4 }, { x: -5, z: 4 }, { x: 0, z: 4 }, { x: 5, z: 4 }, { x: 10, z: 4 },
+                { x: -10, z: -4 }, { x: -5, z: -4 }, { x: 0, z: -4 }, { x: 5, z: -4 }, { x: 10, z: -4 }
+            ];
+            
+            ceilingLights.forEach(pos => {
+                const light = new THREE.PointLight(0xffffee, 0.0005, 18);
+                light.position.set(pos.x, 5.5, pos.z);
+                interior.add(light);
+            });
+            
+            return interior;
+        }
+
+        // Создание лестницы
+        function createStairs() {
+            const stairsGroup = new THREE.Group();
+            const stepMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+            
+            // Создаем 10 ступенек
+            for (let i = 0; i < 9; i++) {
+                const step = new THREE.Mesh(
+                    new THREE.BoxGeometry(2, 0.7, 1.2),
+                    stepMaterial
+                );
+                step.position.set(0, i * 0.7, i * 0.9);
+                stairsGroup.add(step);
+            }
+            
+            // Перила
+            const railingMaterial = new THREE.MeshPhongMaterial({ color: 0xDEB887 });
+            
+            // Левое перило
+            const leftRailing = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 13, 8),
+                railingMaterial
+            );
+            leftRailing.position.set(-1, 0.5, 4);
+            stairsGroup.add(leftRailing);
+            
+            // Правое перило
+            const rightRailing = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 13, 8),
+                railingMaterial
+            );
+            rightRailing.position.set(1, 0.5, 4);
+            stairsGroup.add(rightRailing);
+            
+            return stairsGroup;
+        }
+
+        // Создание лестницы (2 этаж)
+        function createStairs2() {
+            const stairsGroup = new THREE.Group();
+            
+            // Перила
+            const railingMaterial = new THREE.MeshPhongMaterial({ color: 0xDEB887 });
+            
+            // Левое перило
+            const leftRailing = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 3, 8),
+                railingMaterial
+            );
+            leftRailing.position.set(-1, 0.5, 4);
+            stairsGroup.add(leftRailing);
+            
+            // Правое перило
+            const rightRailing = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 3, 8),
+                railingMaterial
+            );
+            rightRailing.position.set(1, 0.5, 4);
+            stairsGroup.add(rightRailing);
+            
+            return stairsGroup;
+        }
+
+        // Создание второго этажа
+        function createSchoolInteriorSecondFloor() {
+            const interior = new THREE.Group();
+            
+            // Внутренние стены
+            const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xF5F5DC });
+            
+            // Пол второго этажа
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(28, 0.2, 23),
+                new THREE.MeshPhongMaterial({ color: 0xb34e29 })
+            );
+            floor.position.set(0, -0.09, 0);
+            interior.add(floor);
+            
+            // Потолок второго этажа
+            const ceiling = new THREE.Mesh(
+                new THREE.BoxGeometry(28, 0.2, 23),
+                new THREE.MeshPhongMaterial({ color: 0xF5F5DC })
+            );
+            ceiling.position.set(0, 6, 0);
+            interior.add(ceiling);
+            
+            // Стены коридора
+            const corridorWall1 = new THREE.Mesh(
+                new THREE.BoxGeometry(28, 6, 0.2),
+                wallMaterial
+            );
+            corridorWall1.position.set(0, 3, 11.5);
+            interior.add(corridorWall1);
+            
+            const corridorWall2 = new THREE.Mesh(
+                new THREE.BoxGeometry(28, 6, 0.2),
+                wallMaterial
+            );
+            corridorWall2.position.set(0, 3, -11.5);
+            interior.add(corridorWall2);
+            
+            // Перегородки между классами
+            const partition1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 6, 23),
+                wallMaterial
+            );
+            partition1.position.set(13.9, 3, 0);
+            interior.add(partition1);
+            
+            const partition2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 6, 23),
+                wallMaterial
+            );
+            partition2.position.set(-13.9, 3, 0);
+            interior.add(partition2);
+            
+            // Класс 3 (правый) - кабинет информатики
+            const class3 = createComputerClassroom(7, 0, 0xE6E6FF);
+            interior.add(class3);
+            
+            // Класс 4 (левый) - кабинет физики
+            const class4 = createPhysicsClassroom(-7, 0, 0xFFE6E6);
+            interior.add(class4);
+            
+            // Библиотека на втором этаже
+            const library = createLibrary(0, -8);
+            interior.add(library);
+
+            // Лестница на первый этаж 
+            const stairs2 = createStairs2();
+            stairs2.position.set(-4, 0, -9); 
+            stairs2.rotation.y = Math.PI / 2;
+            stairs2.userData.isStairs = true;
+            interior.add(stairs2);
+            
+            // Добавляем комнатные растения на втором этаже - размещаем в углах коридора
+            interior.add(createIndoorPlant(-12, -0.5, 9, 0.8));  // Левый дальний угол
+            interior.add(createIndoorPlant(12, -0.5, 9, 0.8));   // Правый дальний угол
+            interior.add(createIndoorPlant(-12, -0.5, -9, 0.8)); // Левый ближний угол
+            interior.add(createIndoorPlant(12, -0.5, -9, 0.8));  // Правый ближний угол
+            
+            // Равномерное освещение в коридоре второго этажа
+            const corridorLight = new THREE.HemisphereLight(0xffffee, 0xffffff, 0.001);
+            corridorLight.position.set(0, 5, 0);
+            interior.add(corridorLight);
+            
+            // Потолочные светильники для равномерного освещения (расширенная сетка)
+            const ceilingLights = [
+                // Центральный ряд
+                { x: -10, z: 0 }, { x: -5, z: 0 }, { x: 0, z: 0 }, { x: 5, z: 0 }, { x: 10, z: 0 },
+                // Передний ряд
+                { x: -10, z: 8 }, { x: -5, z: 8 }, { x: 0, z: 8 }, { x: 5, z: 8 }, { x: 10, z: 8 },
+                // Задний ряд
+                { x: -10, z: -8 }, { x: -5, z: -8 }, { x: 0, z: -8 }, { x: 5, z: -8 }, { x: 10, z: -8 },
+                // Промежуточные ряды
+                { x: -10, z: 4 }, { x: -5, z: 4 }, { x: 0, z: 4 }, { x: 5, z: 4 }, { x: 10, z: 4 },
+                { x: -10, z: -4 }, { x: -5, z: -4 }, { x: 0, z: -4 }, { x: 5, z: -4 }, { x: 10, z: -4 }
+            ];
+            
+            ceilingLights.forEach(pos => {
+                const light = new THREE.PointLight(0xffffee, 0.0005, 18);
+                light.position.set(pos.x, 5.5, pos.z);
+                interior.add(light);
+            });
+            
+            return interior;
+        }
+
+        // Создание кабинета информатики
+        function createComputerClassroom(x, z, color) {
+            const classroom = new THREE.Group();
+            classroom.position.set(x, 0, z);
+            
+            const classroomWidth = 12;
+            const classroomDepth = 10;
+            
+            // Добавляем зоны столкновений для этого класса
+            addClassroomCollisionZones(classroom, x, z, classroomWidth, classroomDepth);
+            
+            // Стены
+            const wallMaterial = new THREE.MeshPhongMaterial({ color: color });
+            
+            // Пол
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(12, 0.1, 10),
+                new THREE.MeshPhongMaterial({ color: 0x8B7355 })
+            );
+            floor.position.set(0, -0.05, 0);
+            classroom.add(floor);
+
+            // Окно на стене
+            const window = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window.position.set(-17.6, 3, -11);
+            classroom.add(window);
+
+
+            // Окно на стене
+            const window2 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window2.position.set(-10.4, 3, -11);
+            classroom.add(window2);
+
+            // Окно на стене
+            const window3 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window3.position.set(-3.6, 3, -11);
+            classroom.add(window3);
+
+
+            // Окно на стене
+            const window4 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window4.position.set(3.6, 3, -11);
+            classroom.add(window4);
+
+            // Окно на стене
+            const window5 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window5.position.set(-17.6, 3, 11);
+            classroom.add(window5);
+
+
+            // Окно на стене
+            const window6 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window6.position.set(-10.4, 3, 11);
+            classroom.add(window6);
+
+            // Окно на стене
+            const window7 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window7.position.set(-3.6, 3, 11);
+            classroom.add(window7);
+
+
+            // Окно на стене
+            const window8 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window8.position.set(3.6, 3, 11);
+            classroom.add(window8);
+
+            // Окно на стене
+            const window9 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+
+            window9.position.set(-20, 3, -7.5);
+            window9.rotation.y = Math.PI / 2;
+            classroom.add(window9);
+
+
+            // Окно на стене
+            const window10 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window10.position.set(-20, 3, -2.5);
+            window10.rotation.y = Math.PI / 2;
+            classroom.add(window10);
+
+            // Окно на стене
+            const window11 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window11.position.set(-20, 3, 2.5);
+            window11.rotation.y = Math.PI / 2;
+            classroom.add(window11);
+
+
+            // Окно на стене
+            const window12 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window12.position.set(-20, 3, 7.5);
+            window12.rotation.y = Math.PI / 2;
+            classroom.add(window12);
+
+            // Окно на стене
+            const window13 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+
+            window13.position.set(6.5, 3, -7.5);
+            window13.rotation.y = Math.PI / 2;
+            classroom.add(window13);
+
+
+            // Окно на стене
+            const window14 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window14.position.set(6.5, 3, -2.5);
+            window14.rotation.y = Math.PI / 2;
+            classroom.add(window14);
+
+            // Окно на стене
+            const window15 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window15.position.set(6.5, 3, 2.5);
+            window15.rotation.y = Math.PI / 2;
+            classroom.add(window15);
+
+
+            // Окно на стене
+            const window16 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window16.position.set(6.5, 3, 7.5);
+            window16.rotation.y = Math.PI / 2;
+            classroom.add(window16);
+
+            // Компьютерные столы
+            const createComputerDesk = (deskX, deskZ) => {
+                const deskGroup = new THREE.Group();
+                
+                // Столешница
+                const tableTop = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.5, 0.05, 0.8),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                tableTop.position.y = 0.75;
+                deskGroup.add(tableTop);
+                
+                // Ножки
+                const legMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+                const legPositions = [
+                    [-0.7, 0.375, 0.35],
+                    [0.7, 0.375, 0.35],
+                    [-0.7, 0.375, -0.35],
+                    [0.7, 0.375, -0.35]
+                ];
+                
+                legPositions.forEach(pos => {
+                    const leg = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.05, 0.75, 0.05),
+                        legMaterial
+                    );
+                    leg.position.set(pos[0], pos[1], pos[2]);
+                    deskGroup.add(leg);
+                });
+                
+                // // Монитор
+                // const monitor = new THREE.Mesh(
+                //     new THREE.BoxGeometry(0.7, 0.5, 0.05),
+                //     new THREE.MeshPhongMaterial({ color: 0x000000 })
+                // );
+                // monitor.position.set(0, 1.05, 0.12);
+                // deskGroup.add(monitor);
+                
+                // Клавиатура
+                const keyboard = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.7, 0.02, 0.5),
+                    new THREE.MeshPhongMaterial({ color: 0x333333 })
+                );
+                keyboard.position.set(0, 0.8, -0.1);
+                deskGroup.add(keyboard);
+                
+                deskGroup.position.set(deskX, 0, deskZ);
+                return deskGroup;
+            };
+            
+            // Расставляем компьютеры (2 ряда по 3)
+            const deskPositions = [
+                { x: -4, z: -3 }, { x: 0, z: -3 }, { x: 4, z: -3 },
+                { x: -4, z: 3 }, { x: 0, z: 3 }, { x: 4, z: 3 }
+            ];
+            
+            deskPositions.forEach(pos => {
+                const desk = createComputerDesk(pos.x, pos.z);
+                classroom.add(desk);
+                
+                // Стул
+                const chair = createChair(pos.x, pos.z - 1.2);
+                classroom.add(chair);
+            });
+            
+            // Стол учителя
+            const teacherDesk = createComputerDesk(0, -6);
+            teacherDesk.scale.set(1.3, 1.3, 1.3);
+            teacherDesk.position.set(0, 0, 7);
+            classroom.add(teacherDesk);
+            
+            // Стул учителя
+            const teacherChair = createChair(0, -4.5);
+            teacherChair.scale.set(1.2, 1.2, 1.2);
+            teacherChair.position.set(0, 0, 9);
+            classroom.add(teacherChair);
+            teacherChair.rotation.y = Math.PI;
+            
+            // Доска с улыбающимся смайликом
+            const board = new THREE.Mesh(
+                new THREE.BoxGeometry(4, 2, 0.1),
+                new THREE.MeshPhongMaterial({ color: 0x2F4F4F })
+            );
+            board.position.set(0, 2.5, 11);
+            board.rotation.y = Math.PI; // Поворачиваем доску к классу
+            classroom.add(board);
+            
+            // Создаем улыбающийся смайлик
+            const smiley = createSmiley(0.8);
+            smiley.position.set(0, 0, 0.06); // Немного перед доской
+            board.add(smiley);
+            
+            // Комнатное растение в классе - размещаем в углу
+            classroom.add(createIndoorPlant(-5, -0.5, 4, 0.7));
+            
+            return classroom;
+        }
+
+        // Создание кабинета физики
+        function createPhysicsClassroom(x, z, color) {
+            const classroom = new THREE.Group();
+            classroom.position.set(x, 0, z);
+            
+            const classroomWidth = 12;
+            const classroomDepth = 10;
+            
+            // Добавляем зоны столкновений для этого класса
+            addClassroomCollisionZones(classroom, x, z, classroomWidth, classroomDepth);
+            
+            // Стены
+            const wallMaterial = new THREE.MeshPhongMaterial({ color: color });
+            
+            // Пол
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(12, 0.1, 10),
+                new THREE.MeshPhongMaterial({ color: 0x8B7355 })
+            );
+            floor.position.set(0, -0.05, 0);
+            classroom.add(floor);
+            
+            // Лабораторные столы
+            const createLabTable = (tableX, tableZ) => {
+                const tableGroup = new THREE.Group();
+                
+                // Столешница
+                const tableTop = new THREE.Mesh(
+                    new THREE.BoxGeometry(2, 0.1, 1),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                tableTop.position.y = 0.8;
+                tableGroup.add(tableTop);
+                
+                // Ножки
+                const legMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+                const legPositions = [
+                    [-0.9, 0.4, 0.45],
+                    [0.9, 0.4, 0.45],
+                    [-0.9, 0.4, -0.45],
+                    [0.9, 0.4, -0.45]
+                ];
+                
+                legPositions.forEach(pos => {
+                    const leg = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.1, 0.8, 0.1),
+                        legMaterial
+                    );
+                    leg.position.set(pos[0], pos[1], pos[2]);
+                    tableGroup.add(leg);
+                });
+                
+                tableGroup.position.set(tableX, 0, tableZ);
+                return tableGroup;
+            };
+            
+            // Расставляем лабораторные столы
+            const tablePositions = [
+                { x: -3, z: -2 }, { x: 3, z: -2 },
+                { x: -3, z: 2 }, { x: 3, z: 2 }
+            ];
+            
+            const physicsBookColors = [0x8B0000, 0x4B0082, 0x006400, 0xFF4500];
+            
+            tablePositions.forEach((pos, index) => {
+                const table = createLabTable(pos.x, pos.z);
+                classroom.add(table);
+                
+                // Добавляем стул для каждого стола
+                const chair = createChair(pos.x, pos.z - 1.2);
+                classroom.add(chair);
+                
+                // Добавляем учебники на лабораторный стол
+                const book1 = createTextbook(pos.x - 0.4, 0.85, pos.z, physicsBookColors[index % physicsBookColors.length], Math.random() * 0.2);
+                classroom.add(book1);
+                
+                const book2 = createTextbook(pos.x + 0.4, 0.85, pos.z + 0.1, physicsBookColors[(index + 2) % physicsBookColors.length], Math.random() * 0.2 - 0.1);
+                classroom.add(book2);
+            });
+            
+            // Стол учителя
+            const teacherDesk = createLabTable(0, -5);
+            teacherDesk.scale.set(1.5, 1, 1.2);
+            teacherDesk.position.set(0, 0, 7);
+            classroom.add(teacherDesk);
+            
+            // Учебники на столе учителя физики
+            const teacherBook1 = createTextbook(0.4, 0.85, 7, 0x4B0082, 0.1);
+            classroom.add(teacherBook1);
+            const teacherBook2 = createTextbook(-0.4, 0.85, 7.1, 0x8B0000, -0.15);
+            classroom.add(teacherBook2);
+            const teacherBook3 = createTextbook(0, 0.88, 7.2, 0x006400, 0.05);
+            classroom.add(teacherBook3);
+            
+            // Стул учителя
+            const teacherChair = createChair(0, 4.5);
+            teacherChair.scale.set(1.2, 1.2, 1.2);
+            teacherChair.position.set(0, 0, 9);
+            classroom.add(teacherChair);
+            teacherChair.rotation.y = Math.PI;
+            
+            // Доска с улыбающимся смайликом
+            const board = new THREE.Mesh(
+                new THREE.BoxGeometry(4, 2, 0.1),
+                new THREE.MeshPhongMaterial({ color: 0x2F4F4F })
+            );
+            board.position.set(0, 2.5, 11);
+            board.rotation.y = Math.PI; // Поворачиваем доску к классу
+            classroom.add(board);
+            
+            // Создаем улыбающийся смайлик
+            const smiley = createSmiley(0.8);
+            smiley.position.set(0, 0, 0.06); // Немного перед доску
+            board.add(smiley);
+            
+            // Комнатное растение в классе - размещаем в углу
+            classroom.add(createIndoorPlant(5, -0.5, -4, 0.8));
+            
+            return classroom;
+        }
+
+        // Создание библиотеки
+        function createLibrary(x, z) {
+            const library = new THREE.Group();
+            library.position.set(x, 0, z);
+            
+            const libraryWidth = 20;
+            const libraryDepth = 8;
+            
+            // Добавляем зоны столкновений для библиотеки
+            addClassroomCollisionZones(library, x, z, libraryWidth, libraryDepth);
+            
+            // Пол
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(20, 0.1, 8),
+                new THREE.MeshPhongMaterial({ color: 0x8B7355 })
+            );
+            floor.position.set(0, -0.05, 0);
+            library.add(floor);
+            
+            // Книжные полки
+            const createBookshelf = (shelfX, shelfZ, rotation) => {
+                const shelfGroup = new THREE.Group();
+                
+                // Основа полки
+                const shelfBase = new THREE.Mesh(
+                    new THREE.BoxGeometry(4, 2.5, 0.5),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                shelfGroup.add(shelfBase);
+                
+                shelfGroup.position.set(shelfX, 1.25, shelfZ);
+                shelfGroup.rotation.y = rotation;
+                return shelfGroup;
+            };
+            
+            // Расставляем книжные полки
+            library.add(createBookshelf(-12, -1, 30));
+            library.add(createBookshelf(-6, -1, 30));
+            library.add(createBookshelf(-9, -1, 30));
+            
+            // Столы для чтения
+            const createReadingTable = (tableX, tableZ) => {
+                const tableGroup = new THREE.Group();
+                
+                // Столешница
+                const tableTop = new THREE.Mesh(
+                    new THREE.BoxGeometry(2, 0.1, 1),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                tableTop.position.y = 0.7;
+                tableGroup.add(tableTop);
+                
+                // Ножки
+                const legMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+                const legPositions = [
+                    [-0.8, 0.35, 0.4],
+                    [0.8, 0.35, 0.4],
+                    [-0.8, 0.35, -0.4],
+                    [0.8, 0.35, -0.4]
+                ];
+                
+                legPositions.forEach(pos => {
+                    const leg = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.1, 0.7, 0.1),
+                        legMaterial
+                    );
+                    leg.position.set(pos[0], pos[1], pos[2]);
+                    tableGroup.add(leg);
+                });
+                
+                tableGroup.position.set(tableX, 0, tableZ);
+                return tableGroup;
+            };
+            
+            // Добавляем растения в библиотеку - размещаем в углах
+            // library.add(createIndoorPlant(-9, 0, 3.5, 0.9));  // Левый угол
+            // library.add(createIndoorPlant(9, 0, 3.5, 0.9));   // Правый угол
+            
+            return library;
+        }
+
+        // Создание нормального стула
+        function createChair(chairX, chairZ) {
+            const chairGroup = new THREE.Group();
+            
+            // Сиденье
+            const seat = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 0.05, 0.8),
+                new THREE.MeshPhongMaterial({ color: 0xA0522D })
+            );
+            seat.position.y = 0.45;
+            chairGroup.add(seat);
+            
+            // Ножки стула
+            const legMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+            
+            const leg1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.45, 0.05),
+                legMaterial
+            );
+            leg1.position.set(-0.35, 0.225, 0.35);
+            chairGroup.add(leg1);
+            
+            const leg2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.45, 0.05),
+                legMaterial
+            );
+            leg2.position.set(0.35, 0.225, 0.35);
+            chairGroup.add(leg2);
+            
+            const leg3 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.45, 0.05),
+                legMaterial
+            );
+            leg3.position.set(-0.35, 0.225, -0.35);
+            chairGroup.add(leg3);
+            
+            const leg4 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.45, 0.05),
+                legMaterial
+            );
+            leg4.position.set(0.35, 0.225, -0.35);
+            chairGroup.add(leg4);
+            
+            // Спинка стула
+            const backrest = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 0.6, 0.05),
+                new THREE.MeshPhongMaterial({ color: 0xA0522D })
+            );
+            backrest.position.set(0, 0.75, -0.3);
+            chairGroup.add(backrest);
+            
+            // Боковые поддержки спинки
+            const support1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.3, 0.05),
+                legMaterial
+            );
+            support1.position.set(-0.35, 0.6, -0.35);
+            chairGroup.add(support1);
+            
+            const support2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.3, 0.05),
+                legMaterial
+            );
+            support2.position.set(0.35, 0.6, -0.35);
+            chairGroup.add(support2);
+            
+            chairGroup.position.set(chairX, 0, chairZ);
+            return chairGroup;
+        }
+
+        // Создание улыбающегося смайлика с красивыми глазами и изначальной улыбкой
+        function createSmiley(radius) {
+            const smileyGroup = new THREE.Group();
+            
+            // Лицо (желтый круг)
+            const faceGeometry = new THREE.CircleGeometry(radius, 32);
+            const faceMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFF00 });
+            const face = new THREE.Mesh(faceGeometry, faceMaterial);
+            smileyGroup.add(face);
+            
+            // Создание красивых глаз
+            function createEye(x, y) {
+                const eyeGroup = new THREE.Group();
+                
+                // Белок глаза
+                const whiteGeometry = new THREE.CircleGeometry(radius * 0.15, 16);
+                const whiteMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+                const eyeWhite = new THREE.Mesh(whiteGeometry, whiteMaterial);
+                eyeGroup.add(eyeWhite);
+                
+                // Радужка (цветная часть)
+                const irisGeometry = new THREE.CircleGeometry(radius * 0.08, 12);
+                const irisMaterial = new THREE.MeshPhongMaterial({ color: 0x4169E1 }); // Royal Blue
+                const iris = new THREE.Mesh(irisGeometry, irisMaterial);
+                iris.position.z = 0.01;
+                eyeGroup.add(iris);
+                
+                // Зрачок
+                const pupilGeometry = new THREE.CircleGeometry(radius * 0.04, 8);
+                const pupilMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+                const pupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+                pupil.position.z = 0.02;
+                eyeGroup.add(pupil);
+                
+                // Блик в глазу (создает эффект живости)
+                const highlightGeometry = new THREE.CircleGeometry(radius * 0.02, 6);
+                const highlightMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+                const highlight = new THREE.Mesh(highlightGeometry, highlightMaterial);
+                highlight.position.set(radius * 0.03, radius * 0.03, 0.03);
+                eyeGroup.add(highlight);
+                
+                // Веко (тонкая обводка)
+                const eyelidGeometry = new THREE.RingGeometry(radius * 0.145, radius * 0.155, 16);
+                const eyelidMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0x000000,
+                    side: THREE.DoubleSide
+                });
+                const eyelid = new THREE.Mesh(eyelidGeometry, eyelidMaterial);
+                eyelid.position.z = 0.005;
+                eyeGroup.add(eyelid);
+                
+                eyeGroup.position.set(x, y, 0.01);
+                return eyeGroup;
+            }
+            
+            // Левый глаз
+            const leftEye = createEye(-radius * 0.3, radius * 0.2);
+            smileyGroup.add(leftEye);
+            
+            // Правый глаз
+            const rightEye = createEye(radius * 0.3, radius * 0.2);
+            smileyGroup.add(rightEye);
+            
+            // Рот - изначальный вариант улыбки (крутая дуга)
+            const smileCurve = new THREE.CubicBezierCurve3(
+                new THREE.Vector3(-radius * 0.4, -radius * 0.4, 0.01),      // Начальная точка (опущена)
+                new THREE.Vector3(-radius * 0.2, -radius * 0.7, 0.01),      // Контрольная точка 1 (сильно опущена)
+                new THREE.Vector3(radius * 0.2, -radius * 0.7, 0.01),       // Контрольная точка 2 (сильно опущена)
+                new THREE.Vector3(radius * 0.4, -radius * 0.4, 0.01)        // Конечная точка (опущена)
+            );
+            
+            const smilePoints = smileCurve.getPoints(20);
+            const smileGeometry = new THREE.BufferGeometry().setFromPoints(smilePoints);
+            
+            const smileMaterial = new THREE.LineBasicMaterial({ 
+                color: 0x000000,
+                linewidth: 3
+            });
+            
+            // Основная линия улыбки
+            const smileLine = new THREE.Line(smileGeometry, smileMaterial);
+            smileyGroup.add(smileLine);
+            
+            // Дополнительная линия для объема улыбки
+            const smileLine2 = new THREE.Line(smileGeometry, smileMaterial);
+            smileLine2.position.z = 0.005;
+            smileyGroup.add(smileLine2);
+            
+            // Легкий румянец на щеках (опущен и расположен снаружи)
+            const blushGeometry = new THREE.CircleGeometry(radius * 0.15, 16);
+            const blushMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xFFB6C1,
+                transparent: true,
+                opacity: 0.3
+            });
+            
+            const leftBlush = new THREE.Mesh(blushGeometry, blushMaterial);
+            leftBlush.position.set(-radius * 0.55, -radius * 0.2, 0.005);    // Опущен и снаружи
+            smileyGroup.add(leftBlush);
+            
+            const rightBlush = new THREE.Mesh(blushGeometry, blushMaterial);
+            rightBlush.position.set(radius * 0.55, -radius * 0.2, 0.005);     // Опущен и снаружи
+            smileyGroup.add(rightBlush);
+            
+            return smileyGroup;
+        }
+
+        // Создание класса с нормальными партами
+        function createClassroom(x, z, color) {
+            const classroom = new THREE.Group();
+            classroom.position.set(x, 0, z);
+            
+            const classroomWidth = 12;
+            const classroomDepth = 10;
+            
+            // Добавляем зоны столкновений для этого класса
+            addClassroomCollisionZones(classroom, x, z, classroomWidth, classroomDepth);
+            
+            // Функция для создания нормальной парты
+            function createDesk(deskX, deskZ) {
+                const deskGroup = new THREE.Group();
+                
+                // Столешница
+                const tableTop = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.8, 0.05, 0.8),
+                    new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+                );
+                tableTop.position.y = 0.75;
+                deskGroup.add(tableTop);
+                
+                // Ножки парты
+                const legMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+                
+                // Передние ножки
+                const frontLeg1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.75, 0.05),
+                    legMaterial
+                );
+                frontLeg1.position.set(-0.85, 0.375, 0.35);
+                deskGroup.add(frontLeg1);
+                
+                const frontLeg2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.75, 0.05),
+                    legMaterial
+                );
+                frontLeg2.position.set(0.85, 0.375, 0.35);
+                deskGroup.add(frontLeg2);
+                
+                // Задние ножки
+                const backLeg1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.75, 0.05),
+                    legMaterial
+                );
+                backLeg1.position.set(-0.85, 0.375, -0.35);
+                deskGroup.add(backLeg1);
+                
+                const backLeg2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.75, 0.05),
+                    legMaterial
+                );
+                backLeg2.position.set(0.85, 0.375, -0.35);
+                deskGroup.add(backLeg2);
+                
+                // Перекладины для устойчивости
+                const crossbar1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.7, 0.03, 0.03),
+                    legMaterial
+                );
+                crossbar1.position.set(0, 0.2, 0.35);
+                deskGroup.add(crossbar1);
+                
+                const crossbar2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.7, 0.03, 0.03),
+                    legMaterial
+                );
+                crossbar2.position.set(0, 0.2, -0.35);
+                deskGroup.add(crossbar2);
+                
+                deskGroup.position.set(deskX, 0, deskZ);
+                return deskGroup;
+            }
+            
+            // Функция для создания нормального стула
+            function createChair(chairX, chairZ) {
+                const chairGroup = new THREE.Group();
+                
+                // Сиденье
+                const seat = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 0.05, 0.8),
+                    new THREE.MeshPhongMaterial({ color: 0xA0522D })
+                );
+                seat.position.y = 0.45;
+                chairGroup.add(seat);
+                
+                // Ножки стула
+                const legMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+                
+                const leg1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.45, 0.05),
+                    legMaterial
+                );
+                leg1.position.set(-0.35, 0.225, 0.35);
+                chairGroup.add(leg1);
+                
+                const leg2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.45, 0.05),
+                    legMaterial
+                );
+                leg2.position.set(0.35, 0.225, 0.35);
+                chairGroup.add(leg2);
+                
+                const leg3 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.45, 0.05),
+                    legMaterial
+                );
+                leg3.position.set(-0.35, 0.225, -0.35);
+                chairGroup.add(leg3);
+                
+                const leg4 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.45, 0.05),
+                    legMaterial
+                );
+                leg4.position.set(0.35, 0.225, -0.35);
+                chairGroup.add(leg4);
+                
+                // Спинка стула
+                const backrest = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.8, 0.6, 0.05),
+                    new THREE.MeshPhongMaterial({ color: 0xA0522D })
+                );
+                backrest.position.set(0, 0.75, -0.3);
+                chairGroup.add(backrest);
+                
+                // Боковые поддержки спинки
+                const support1 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.3, 0.05),
+                    legMaterial
+                );
+                support1.position.set(-0.35, 0.6, -0.35);
+                chairGroup.add(support1);
+                
+                const support2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.3, 0.05),
+                    legMaterial
+                );
+                support2.position.set(0.35, 0.6, -0.35);
+                chairGroup.add(support2);
+                
+                chairGroup.position.set(chairX, 0, chairZ);
+                return chairGroup;
+            }
+            
+            // Расставляем парты в классе (3 ряда по 2 парты)
+            const deskPositions = [
+                { x: -3, z: -4 }, { x: 3, z: -4 },    // Первый ряд
+                { x: -3, z: 0 }, { x: 3, z: 0 },      // Второй ряд
+                { x: -3, z: 4 }, { x: 3, z: 4 }       // Третий ряд
+            ];
+            
+            const bookColors = [0x4169E1, 0xDC143C, 0x228B22, 0xFF8C00, 0x9370DB, 0x20B2AA];
+            
+            deskPositions.forEach((pos, index) => {
+                // Парта
+                const desk = createDesk(pos.x, pos.z);
+                classroom.add(desk);
+                
+                // Стул (ставим перед партой)
+                const chair = createChair(pos.x, pos.z - 1.2);
+                classroom.add(chair);
+                
+                // Добавляем учебники на парту
+                const book1 = createTextbook(pos.x - 0.3, 0.78, pos.z, bookColors[index % bookColors.length], Math.random() * 0.3);
+                classroom.add(book1);
+                
+                const book2 = createTextbook(pos.x + 0.3, 0.78, pos.z + 0.1, bookColors[(index + 1) % bookColors.length], Math.random() * 0.3 - 0.15);
+                classroom.add(book2);
+            });
+            
+            // Доска с улыбающимся смайликом
+            const board = new THREE.Mesh(
+                new THREE.BoxGeometry(4, 3, 0.1),
+                new THREE.MeshPhongMaterial({ color: 0x2F4F4F })
+            );
+            board.position.set(0, 3, 11);
+            board.rotation.y = Math.PI; // Поворачиваем доску к классу
+            classroom.add(board);
+            
+            // Создаем улыбающийся смайлик
+            const smiley = createSmiley(1);
+            smiley.position.set(0, 0, 0.06); // Немного перед доской
+            board.add(smiley);
+            
+            // Рамка доски
+            const boardFrame = new THREE.Mesh(
+                new THREE.BoxGeometry(4, 3, 0.2),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            boardFrame.position.set(0, 3, 11.07);
+            boardFrame.rotation.y = Math.PI; // Также поворачиваем рамку
+            classroom.add(boardFrame);
+            
+            // Стол учителя (улучшенный)
+            const teacherDesk = createDesk(0, 6);
+            teacherDesk.scale.set(1.3, 1.3, 1.3);
+            classroom.add(teacherDesk);
+            
+            // Учебники на столе учителя
+            const teacherBook1 = createTextbook(0.3, 1.0, 6, 0x8B0000, 0.1);
+            classroom.add(teacherBook1);
+            const teacherBook2 = createTextbook(-0.3, 1.0, 6.1, 0x00008B, -0.15);
+            classroom.add(teacherBook2);
+            const teacherBook3 = createTextbook(0, 1.03, 6.2, 0x006400, 0.05);
+            classroom.add(teacherBook3);
+            
+            // Стул учителя (улучшенный)
+            const teacherChair = createChair(0, 4.5);
+            teacherChair.scale.set(1.2, 1.2, 1.2);
+            teacherChair.position.set(0, 0, 7.5);
+            classroom.add(teacherChair);
+            teacherChair.rotation.y = Math.PI;
+            
+            // Шкаф в углу
+            const cabinet = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2.5, 0.8),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            cabinet.position.set(0, 1.25, -11);
+            classroom.add(cabinet);
+            
+            // Окно на стене
+            const window = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window.position.set(-3.6, 3, -11);
+            classroom.add(window);
+
+
+            // Окно на стене
+            const window2 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window2.position.set(3.6, 3, -11);
+            classroom.add(window2);
+
+            // Окно на стене
+            const window3 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window3.position.set(-3.6, 3, 11);
+            classroom.add(window3);
+
+
+            // Окно на стене
+            const window4 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window4.position.set(3.6, 3, 11);
+            classroom.add(window4);
+
+            // Окно на стене
+            const window5 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window5.position.set(20, 3, -7.5);
+            window5.rotation.y = Math.PI / 2;
+            classroom.add(window5);
+
+
+            // Окно на стене
+            const window6 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window6.position.set(20, 3, -2.5);
+            window6.rotation.y = Math.PI / 2;
+            classroom.add(window6);
+
+            // Окно на стене
+            const window7 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window7.position.set(20, 3, 2.5);
+            window7.rotation.y = Math.PI / 2;
+            classroom.add(window7);
+
+
+            // Окно на стене
+            const window8 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window8.position.set(20, 3, 7.5);
+            window8.rotation.y = Math.PI / 2;
+            classroom.add(window8);
+
+            // Окно на стене
+            const window9 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window9.position.set(-20.5, 3, -7.5);
+            window9.rotation.y = Math.PI / 2;
+            classroom.add(window9);
+
+
+            // Окно на стене
+            const window10 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window10.position.set(-20.5, 3, -2.5);
+            window10.rotation.y = Math.PI / 2;
+            classroom.add(window10);
+
+            // Окно на стене
+            const window11 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window11.position.set(-20.5, 3, 2.5);
+            window11.rotation.y = Math.PI / 2;
+            classroom.add(window11);
+
+
+            // Окно на стене
+            const window12 = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 2, 0.1),
+                new THREE.MeshPhongMaterial({ 
+                    color: 0x87CEEB,
+                    transparent: true,
+                    opacity: 0.3
+                })
+            );
+            window12.position.set(-20.5, 3, 7.5);
+            window12.rotation.y = Math.PI / 2;
+            classroom.add(window12);
+
+            // Комнатное растение в классе - размещаем в углу
+            classroom.add(createIndoorPlant(-5, -0.5, 4, 0.7));
+
+            return classroom;
+        }
+
+        // Создание второго корпуса школы изнутри (1 этаж)
+        function createSecondBuildingInterior() {
+            const interior = new THREE.Group();
+            
+            // Внутренние стены
+            const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xF5F5DC });
+            
+            // Пол второго корпуса
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(18, 0.2, 23),
+                new THREE.MeshPhongMaterial({ color: 0xb34e29 })
+            );
+            floor.position.set(0, -0.09, 0);
+            interior.add(floor);
+            
+            // Потолок второго корпуса
+            const ceiling = new THREE.Mesh(
+                new THREE.BoxGeometry(18, 0.2, 23),
+                new THREE.MeshPhongMaterial({ color: 0xF5F5DC })
+            );
+            ceiling.position.set(0, 6, 0);
+            interior.add(ceiling);
+            
+            // Стены коридора
+            const corridorWall1 = new THREE.Mesh(
+                new THREE.BoxGeometry(18, 6, 0.2),
+                wallMaterial
+            );
+            corridorWall1.position.set(0, 3, 11.5);
+            interior.add(corridorWall1);
+            
+            const corridorWall2 = new THREE.Mesh(
+                new THREE.BoxGeometry(18, 6, 0.2),
+                wallMaterial
+            );
+            corridorWall2.position.set(0, 3, -11.5);
+            interior.add(corridorWall2);
+            
+            // Боковые стены
+            const sideWall1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 6, 23),
+                wallMaterial
+            );
+            sideWall1.position.set(9, 3, 0);
+            interior.add(sideWall1);
+            
+            const sideWall2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 6, 23),
+                wallMaterial
+            );
+            sideWall2.position.set(-9, 3, 0);
+            interior.add(sideWall2);
+            
+            // Дверь обратно в первый корпус
+            const firstBuildingDoor = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 3.5, 0.2),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            firstBuildingDoor.rotation.y = Math.PI / 2;
+            firstBuildingDoor.position.set(8.95, 1.75, 0);
+            firstBuildingDoor.userData.isFirstBuildingDoor = true;
+            interior.add(firstBuildingDoor);
+
+            // Ручка двери в первый корпус
+            const firstBuildingDoorHandle = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.3, 18),
+                new THREE.MeshPhongMaterial({ color: 0xCCCCCC })
+            );
+            firstBuildingDoorHandle.position.set(8.9, 1.75, 0.7);
+            firstBuildingDoorHandle.rotation.z = Math.PI / 2;
+            interior.add(firstBuildingDoorHandle);
+            
+            // Лестница на второй этаж
+            const stairs = createStairs();
+            stairs.position.set(-4, 0, -9);
+            stairs.rotation.y = Math.PI / 2;
+            stairs.userData.isStairs = true;
+            interior.add(stairs);
+
+            // Окна на первом этаже второго корпуса (аналогично первому корпусу)
+            for (let i = 0; i < 4; i++) {
+                const windowX = -5.5 + i * 4;
+                const window = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 2, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                window.position.set(windowX, 3, 11.4);
+                interior.add(window);
+                
+                const windowBack = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 2, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                windowBack.position.set(windowX, 3, -11.2);
+                interior.add(windowBack);
+            }
+            
+            // Боковые окна
+            for (let i = 0; i < 4; i++) {
+                const windowZ = -7.5 + i * 5;
+                const windowLeft = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 2, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                windowLeft.rotation.y = Math.PI / 2;
+                windowLeft.position.set(8.9, 3, windowZ);
+                interior.add(windowLeft);
+                
+                const windowRight = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 2, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                windowRight.rotation.y = Math.PI / 2;
+                windowRight.position.set(-8.9, 3, windowZ);
+                interior.add(windowRight);
+            }
+            
+            // Спортзал на первом этаже второго корпуса
+            const gym = createGym(0, 0);
+            interior.add(gym);
+
+            // Лавочки для болельщиков (3 штуки)
+            const spectatorBench1 = createSpectatorBench(0, -2.5, 0);
+            interior.add(spectatorBench1);
+            
+            const spectatorBench2 = createSpectatorBench(0, 1.5, 0);
+            interior.add(spectatorBench2);
+            
+            const spectatorBench3 = createSpectatorBench(0, 5.5, 0);
+            interior.add(spectatorBench3);
+            
+            // Футбольные ворота (2 штуки)
+            const footballGoal1 = createFootballGoal(0, -6.5, -8);
+            interior.add(footballGoal1);
+            
+            const footballGoal2 = createFootballGoal2(0, 9.9, 8);
+            interior.add(footballGoal2);
+            
+            // Добавляем зоны столкновений для второго корпуса
+            interiorCollisionZones.push({
+                x: 0,
+                z: 0,
+                width: 18,
+                depth: 23
+            });
+            
+            // Комнатные растения в спортзале - размещаем в углах
+            interior.add(createIndoorPlant(-8, -0.5, 10, 1.0));  // Левый дальний угол
+            interior.add(createIndoorPlant(8, -0.5, 10, 1.0));   // Правый дальний угол
+            interior.add(createIndoorPlant(-8, -0.5, -10, 1.0));  
+            interior.add(createIndoorPlant(8, -0.5, -10, 1.0));   
+
+            // Баскетбольные мячи в спортзале
+            interior.add(createBasketball(-7, 0.35, -9));
+            interior.add(createBasketball(-5, 0.35, -9.5));
+            interior.add(createBasketball(7, 0.35, 9));
+            
+            // Футбольные мячи в спортзале
+            interior.add(createFootball(6, 0.35, 9.5));
+            interior.add(createFootball(-7.5, 0.35, 9));
+            interior.add(createFootball(0, 0.35, -10));
+            
+            // Равномерное освещение в спортзале
+            const gymLight = new THREE.HemisphereLight(0xffffee, 0xffffff, 0.00001);
+            gymLight.position.set(0, 5, 0);
+            interior.add(gymLight);
+            
+            // Потолочные светильники для спортзала (расширенная сетка для равномерности)
+            const gymCeilingLights = [
+                // Центральные ряды
+                { x: -7, z: -8 }, { x: -3.5, z: -8 }, { x: 0, z: -8 }, { x: 3.5, z: -8 }, { x: 7, z: -8 },
+                { x: -7, z: -4 }, { x: -3.5, z: -4 }, { x: 0, z: -4 }, { x: 3.5, z: -4 }, { x: 7, z: -4 },
+                { x: -7, z: 0 }, { x: -3.5, z: 0 }, { x: 0, z: 0 }, { x: 3.5, z: 0 }, { x: 7, z: 0 },
+                { x: -7, z: 4 }, { x: -3.5, z: 4 }, { x: 0, z: 4 }, { x: 3.5, z: 4 }, { x: 7, z: 4 },
+                { x: -7, z: 8 }, { x: -3.5, z: 8 }, { x: 0, z: 8 }, { x: 3.5, z: 8 }, { x: 7, z: 8 }
+            ];
+            
+            gymCeilingLights.forEach(pos => {
+                const light = new THREE.PointLight(0xffffee, 0.00001, 18);
+                light.position.set(pos.x, 5.5, pos.z);
+                interior.add(light);
+            });
+            
+            return interior;
+        }
+
+        // Создание спортзала
+        function createGym(x, z) {
+            const gym = new THREE.Group();
+            gym.position.set(x, 0, z);
+            
+            // Пол спортзала (специальное покрытие)
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(16, 0.1, 20),
+                new THREE.MeshPhongMaterial({ color: 0x228B22 })
+            );
+            floor.position.set(0, -0.05, 0);
+            gym.add(floor);
+            
+            // Баскетбольные кольца
+            const createBasketballHoop = (xPos, zPos) => {
+                const hoopGroup = new THREE.Group();
+                
+                // Щит
+                const backboard = new THREE.Mesh(
+                    new THREE.BoxGeometry(2, 1.8, 0.1),
+                    new THREE.MeshPhongMaterial({ color: 0x1E90FF })
+                );
+                backboard.position.set(0, 4, -0.9);
+                hoopGroup.add(backboard);
+                
+                // Кольцо
+                const ring = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.4, 0.05, 8, 20),
+                    new THREE.MeshPhongMaterial({ color: 0xFF4500 })
+                );
+                ring.rotation.x = Math.PI / 2;
+                ring.position.set(0.3, 4, -0.4);
+                hoopGroup.add(ring);
+                
+                // Сетка для кольца (как снаружи)
+                const netGeometry = new THREE.CylinderGeometry(0.4, 0.3, 0.5, 8, 1, true);
+                const netMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0xFFFFFF,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const net = new THREE.Mesh(netGeometry, netMaterial);
+                net.position.set(0.3, 3.75, -0.4);
+                hoopGroup.add(net);
+                
+                hoopGroup.position.set(xPos, 0, zPos);
+                return hoopGroup;
+            };
+
+            // Баскетбольные кольца 2
+            const createBasketballHoop2 = (xPos, zPos) => {
+                const hoopGroup2 = new THREE.Group();
+                
+                // Щит
+                const backboard2 = new THREE.Mesh(
+                    new THREE.BoxGeometry(2, 1.8, 0.1),
+                    new THREE.MeshPhongMaterial({ color: 0x1E90FF })
+                );
+                backboard2.position.set(0.4, 4, 3.3);
+                hoopGroup2.add(backboard2);
+                
+                // Кольцо
+                const ring2 = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.4, 0.05, 8, 20),
+                    new THREE.MeshPhongMaterial({ color: 0xFF4500 })
+                );
+                ring2.rotation.x = Math.PI / 2;
+                ring2.position.set(0.7, 4, 2.5);
+                hoopGroup2.add(ring2);
+                
+                // Сетка для кольца (как снаружи)
+                const netGeometry = new THREE.CylinderGeometry(0.4, 0.3, 0.5, 8, 1, true);
+                const netMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0xFFFFFF,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const net2 = new THREE.Mesh(netGeometry, netMaterial);
+                net2.position.set(0.7, 3.75, 2.5);
+                hoopGroup2.add(net2);
+                
+                hoopGroup2.position.set(xPos, 0, zPos);
+                return hoopGroup2;
+            };
+            
+            // Два баскетбольных кольца на противоположных сторонах
+            gym.add(createBasketballHoop(0, -7));
+            gym.add(createBasketballHoop2(0, 8));
+            
+            // Разметка спортзала
+            const markingMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+            
+            // Центральная линия
+            const centerLine = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.01, 20),
+                markingMaterial
+            );
+            centerLine.position.set(0, 0.01, 1.5);
+            centerLine.rotation.y = Math.PI / 2;
+            gym.add(centerLine);
+            
+            // Центральный круг
+            const centerCircle = new THREE.Mesh(
+                new THREE.RingGeometry(1.5, 1.6, 32),
+                markingMaterial
+            );
+            centerCircle.rotation.x = -Math.PI / 2;
+            centerCircle.position.set(0, 0.02, 1.5);
+            gym.add(centerCircle);
+            
+            // Спортивные маты в углу
+            const mat = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 0.2, 2),
+                new THREE.MeshPhongMaterial({ color: 0x4169E1 })
+            );
+            mat.position.set(-6, 0.1, 10);
+            gym.add(mat);
+            
+            return gym;
+        }
+
+        // Создание лавочки для болельщиков
+        function createSpectatorBench(x, z, rotation) {
+            const benchGroup = new THREE.Group();
+            
+            // Сиденье
+            const seat = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 0.15, 0.8),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            seat.position.y = 0.5;
+            benchGroup.add(seat);
+            
+            // Спинка
+            const backrest = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 0.8, 0.1),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            backrest.position.set(0, 0.9, -0.35);
+            benchGroup.add(backrest);
+            
+            // Ножки
+            const legMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+            
+            // Передние ножки
+            const frontLeg1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.5, 0.1),
+                legMaterial
+            );
+            frontLeg1.position.set(-1.4, 0.25, 0.35);
+            benchGroup.add(frontLeg1);
+            
+            const frontLeg2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.5, 0.1),
+                legMaterial
+            );
+            frontLeg2.position.set(1.4, 0.25, 0.35);
+            benchGroup.add(frontLeg2);
+            
+            // Задние ножки
+            const backLeg1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.5, 0.1),
+                legMaterial
+            );
+            backLeg1.position.set(-1.4, 0.25, -0.35);
+            benchGroup.add(backLeg1);
+            
+            const backLeg2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.5, 0.1),
+                legMaterial
+            );
+            backLeg2.position.set(1.4, 0.25, -0.35);
+            benchGroup.add(backLeg2);
+            
+            benchGroup.position.set(-7.5, 0, z);
+            benchGroup.rotation.y = Math.PI / 2;
+            
+            return benchGroup;
+        }
+
+        // Создание футбольных ворот
+        function createFootballGoal(x, z, rotation = 0) {
+            const goalGroup = new THREE.Group();
+            
+            const goalMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+            const netMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xFFFFFF, 
+                transparent: true, 
+                opacity: 0.7,
+                wireframe: true
+            });
+            
+            // Левая стойка
+            const leftPost = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 2.5, 8),
+                goalMaterial
+            );
+            leftPost.position.set(-1.2, 1.25, 0);
+            goalGroup.add(leftPost);
+            
+            // Правая стойка
+            const rightPost = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 2.5, 8),
+                goalMaterial
+            );
+            rightPost.position.set(1.2, 1.25, 0);
+            goalGroup.add(rightPost);
+            
+            // Верхняя перекладина
+            const crossbar = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 2.4, 8),
+                goalMaterial
+            );
+            crossbar.position.set(0, 2.5, 0);
+            crossbar.rotation.z = Math.PI / 2;
+            goalGroup.add(crossbar);
+            
+            // Задняя перекладина
+            const backbar = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 2.4, 8),
+                goalMaterial
+            );
+            backbar.position.set(0, 1.25, -1.2);
+            backbar.rotation.z = Math.PI / 2;
+            goalGroup.add(backbar);
+            
+            // Сетка (упрощенная)
+            const net = new THREE.Mesh(
+                new THREE.BoxGeometry(2.4, 2.5, 1.2),
+                netMaterial
+            );
+            net.position.set(0, 1.25, -0.6);
+            goalGroup.add(net);
+            
+            goalGroup.position.set(x, 0, z);
+            goalGroup.rotation.y = rotation * Math.PI / 180;
+            
+            return goalGroup;
+        }
+
+        function createFootballGoal2(x, z, rotation = 0) {
+            const goalGroup2 = new THREE.Group();
+            
+            const goalMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+            const netMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xFFFFFF, 
+                transparent: true, 
+                opacity: 0.7,
+                wireframe: true
+            });
+
+            // Левая стойка
+            const leftPost = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 2.5, 8),
+                goalMaterial
+            );
+            leftPost.position.set(-1.2, 1.25, 0);
+            goalGroup2.add(leftPost);
+            
+            // Правая стойка
+            const rightPost = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 2.5, 8),
+                goalMaterial
+            );
+            rightPost.position.set(1.2, 1.25, 0);
+            goalGroup2.add(rightPost);
+            
+            // Верхняя перекладина
+            const crossbar = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 2.4, 8),
+                goalMaterial
+            );
+            crossbar.position.set(0, 2.5, 0);
+            crossbar.rotation.z = Math.PI / 2;
+            goalGroup2.add(crossbar);
+            
+            // Задняя перекладина
+            const backbar = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 2.4, 8),
+                goalMaterial
+            );
+            backbar.position.set(0, 1.25, -1.2);
+            backbar.rotation.z = Math.PI / 2;
+            goalGroup2.add(backbar);
+            
+            // Сетка (упрощенная)
+            const net = new THREE.Mesh(
+                new THREE.BoxGeometry(2.4, 2.5, 1.2),
+                netMaterial
+            );
+            net.position.set(0, 1.25, -0.6);
+            goalGroup2.add(net);
+            
+            goalGroup2.position.set(x, 0, z);
+            goalGroup2.rotation.y = Math.PI;
+            
+            return goalGroup2;
+        }
+
+        // Создание второго этажа второго корпуса
+        function createSecondBuildingSecondFloor() {
+            const interior = new THREE.Group();
+            
+            // Внутренние стены
+            const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xF5F5DC });
+            
+            // Пол второго этажа второго корпуса
+            const floor = new THREE.Mesh(
+                new THREE.BoxGeometry(18, 0.2, 23),
+                new THREE.MeshPhongMaterial({ color: 0xb34e29 })
+            );
+            floor.position.set(0, -0.09, 0);
+            interior.add(floor);
+            
+            // Потолок
+            const ceiling = new THREE.Mesh(
+                new THREE.BoxGeometry(18, 0.2, 23),
+                new THREE.MeshPhongMaterial({ color: 0xF5F5DC })
+            );
+            ceiling.position.set(0, 6, 0);
+            interior.add(ceiling);
+            
+            // Стены коридора
+            const corridorWall1 = new THREE.Mesh(
+                new THREE.BoxGeometry(18, 6, 0.2),
+                wallMaterial
+            );
+            corridorWall1.position.set(0, 3, 11.5);
+            interior.add(corridorWall1);
+            
+            const corridorWall2 = new THREE.Mesh(
+                new THREE.BoxGeometry(18, 6, 0.2),
+                wallMaterial
+            );
+            corridorWall2.position.set(0, 3, -11.5);
+            interior.add(corridorWall2);
+            
+            // Боковые стены
+            const sideWall1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 6, 23),
+                wallMaterial
+            );
+            sideWall1.position.set(9, 3, 0);
+            interior.add(sideWall1);
+            
+            const sideWall2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 6, 23),
+                wallMaterial
+            );
+            sideWall2.position.set(-9, 3, 0);
+            interior.add(sideWall2);
+            
+            // Лестница на первый этаж
+            const stairs = createStairs2();
+            stairs.position.set(-4, 0, -9);
+            stairs.rotation.y = Math.PI / 2;
+            stairs.userData.isStairs = true;
+            interior.add(stairs);
+            
+            // Окна на втором этаже второго корпуса (копируем с первого этажа)
+            for (let i = 0; i < 4; i++) {
+                const windowX = -5.5 + i * 4;
+                const window = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 2, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                window.position.set(windowX, 3, 11.4);
+                interior.add(window);
+                
+                const windowBack = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 2, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                windowBack.position.set(windowX, 3, -11.2);
+                interior.add(windowBack);
+            }
+            
+            // Боковые окна на втором этаже
+            for (let i = 0; i < 4; i++) {
+                const windowZ = -7.5 + i * 5;
+                const windowLeft = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 2, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                windowLeft.rotation.y = Math.PI / 2;
+                windowLeft.position.set(8.9, 3, windowZ);
+                interior.add(windowLeft);
+                
+                const windowRight = new THREE.Mesh(
+                    new THREE.BoxGeometry(3, 2, 0.1),
+                    new THREE.MeshPhongMaterial({ 
+                        color: 0x87CEEB,
+                        transparent: true,
+                        opacity: 0.3
+                    })
+                );
+                windowRight.rotation.y = Math.PI / 2;
+                windowRight.position.set(-8.9, 3, windowZ);
+                interior.add(windowRight);
+            }
+            
+            // Столовая на втором этаже второго корпуса
+            const cafeteria = createCafeteria(0, 0);
+            interior.add(cafeteria);
+
+            // Зона отдыха
+            const relaxationZone = createRelaxationZone(0, -8);
+            interior.add(relaxationZone);
+
+            // Два длинных стола почти на всю ширину помещения
+            const longTableMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+            
+            // Длинный стол 1 (слева)
+            const longTable1 = new THREE.Group();
+            
+            const tableTop1 = new THREE.Mesh(
+                new THREE.BoxGeometry(14, 0.1, 2),
+                longTableMaterial
+            );
+            tableTop1.position.y = 0.8;
+            longTable1.add(tableTop1);
+            
+            // Ножки для первого стола (8 ножек для устойчивости)
+            const legPositions1 = [
+                [-6.5, 0.4, -0.9], [6.5, 0.4, -0.9],
+                [-6.5, 0.4, 0.9], [6.5, 0.4, 0.9],
+                [-2, 0.4, -0.9], [2, 0.4, -0.9],
+                [-2, 0.4, 0.9], [2, 0.4, 0.9]
+            ];
+            
+            legPositions1.forEach(pos => {
+                const leg = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.1, 0.8, 0.1),
+                    new THREE.MeshPhongMaterial({ color: 0x654321 })
+                );
+                leg.position.set(pos[0], pos[1], pos[2]);
+                longTable1.add(leg);
+            });
+            
+            longTable1.position.set(0, 0, 1);
+            interior.add(longTable1);
+            
+            // Добавляем тарелки на первый стол
+            const platePositions1 = [
+                { x: -6.5, z: 1.5 }, { x: -4, z: 1.5 }, { x: -1.5, z: 1.5 },
+                { x: 1.5, z: 1.5 }, { x: 4, z: 1.5 }, { x: 6.5, z: 1.5 },
+                { x: -6.5, z: 0.5 }, { x: -4, z: 0.5 }, { x: -1.5, z: 0.5 },
+                { x: 1.5, z: 0.5 }, { x: 4, z: 0.5 }, { x: 6.5, z: 0.5 }
+            ];
+            
+            platePositions1.forEach(pos => {
+                const plate = createPlate(pos.x, 0.85, pos.z);
+                interior.add(plate);
+            });
+            
+            // Длинный стол 2 (справа)
+            const longTable2 = new THREE.Group();
+            
+            const tableTop2 = new THREE.Mesh(
+                new THREE.BoxGeometry(14, 0.1, 2),
+                longTableMaterial
+            );
+            tableTop2.position.y = 0.8;
+            longTable2.add(tableTop2);
+            
+            // Ножки для второго стола
+            const legPositions2 = [
+                [-6.5, 0.4, -0.9], [6.5, 0.4, -0.9],
+                [-6.5, 0.4, 0.9], [6.5, 0.4, 0.9],
+                [-2, 0.4, -0.9], [2, 0.4, -0.9],
+                [-2, 0.4, 0.9], [2, 0.4, 0.9]
+            ];
+            
+            legPositions2.forEach(pos => {
+                const leg = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.1, 0.8, 0.1),
+                    new THREE.MeshPhongMaterial({ color: 0x654321 })
+                );
+                leg.position.set(pos[0], pos[1], pos[2]);
+                longTable2.add(leg);
+            });
+            
+            longTable2.position.set(0, 0, 7);
+            interior.add(longTable2);
+            
+            // Добавляем тарелки на второй стол
+            const platePositions2 = [
+                { x: -6.5, z: 7.5 }, { x: -4, z: 7.5 }, { x: -1.5, z: 7.5 },
+                { x: 1.5, z: 7.5 }, { x: 4, z: 7.5 }, { x: 6.5, z: 7.5 },
+                { x: -6.5, z: 6.5 }, { x: -4, z: 6.5 }, { x: -1.5, z: 6.5 },
+                { x: 1.5, z: 6.5 }, { x: 4, z: 6.5 }, { x: 6.5, z: 6.5 }
+            ];
+            
+            platePositions2.forEach(pos => {
+                const plate = createPlate(pos.x, 0.85, pos.z);
+                interior.add(plate);
+            });
+            
+            // Стулья вокруг столов (повернуты к столам)
+            // Стулья для первого стола
+            const chairPositions1 = [
+                // С левой стороны стола
+                { x: -6.5, z: -2.2, rot: 0 }, { x: -4, z: -2.2, rot: 0 }, { x: -1.5, z: -2.2, rot: 0 },
+                { x: 1.5, z: -2.2, rot: 0 }, { x: 4, z: -2.2, rot: 0 }, { x: 6.5, z: -2.2, rot: 0 },
+                // С правой стороны стола
+                { x: -6.5, z: 2.2, rot: Math.PI }, { x: -4, z: 2.2, rot: Math.PI }, { x: -1.5, z: 2.2, rot: Math.PI },
+                { x: 1.5, z: 2.2, rot: Math.PI }, { x: 4, z: 2.2, rot: Math.PI }, { x: 6.5, z: 2.2, rot: Math.PI }
+            ];
+            
+            chairPositions1.forEach(pos => {
+                const chair = createChair(0 + pos.x, pos.z + 7);
+                chair.rotation.y = pos.rot;
+                interior.add(chair);
+            });
+            
+            // Стулья для второго стола
+            const chairPositions2 = [
+                // С левой стороны стола
+                { x: -6.5, z: -2.2, rot: 0 }, { x: -4, z: -2.2, rot: 0 }, { x: -1.5, z: -2.2, rot: 0 },
+                { x: 1.5, z: -2.2, rot: 0 }, { x: 4, z: -2.2, rot: 0 }, { x: 6.5, z: -2.2, rot: 0 },
+                // С правой стороны стола
+                { x: -6.5, z: 2.2, rot: Math.PI }, { x: -4, z: 2.2, rot: Math.PI }, { x: -1.5, z: 2.2, rot: Math.PI },
+                { x: 1.5, z: 2.2, rot: Math.PI }, { x: 4, z: 2.2, rot: Math.PI }, { x: 6.5, z: 2.2, rot: Math.PI }
+            ];
+            
+            chairPositions2.forEach(pos => {
+                const chair = createChair(0 + pos.x, pos.z + 1);
+                chair.rotation.y = pos.rot;
+                interior.add(chair);
+            });
+            
+            // Комнатные растения в столовой и зоне отдыха - размещаем в углах
+            interior.add(createIndoorPlant(-8, -0.5, 10, 1.0));  // Левый дальний угол
+            interior.add(createIndoorPlant(8, -0.5, 10, 1.0));   // Правый дальний угол
+            interior.add(createIndoorPlant(-8, -0.5, -10, 1.0)); // Левый ближний угол
+            interior.add(createIndoorPlant(8, -0.5, -7.5, 1.0));
+
+            // Равномерное освещение в столовой
+            const cafeteriaLight = new THREE.HemisphereLight(0xffffee, 0xffffff, 0.000003);
+            cafeteriaLight.position.set(0, 5, 0);
+            interior.add(cafeteriaLight);
+            
+            // Потолочные светильники для столовой (расширенная сетка для равномерности)
+            const cafeteriaCeilingLights = [
+                // Центральные ряды
+                { x: -7, z: -8 }, { x: -3.5, z: -8 }, { x: 0, z: -8 }, { x: 3.5, z: -8 }, { x: 7, z: -8 },
+                { x: -7, z: -4 }, { x: -3.5, z: -4 }, { x: 0, z: -4 }, { x: 3.5, z: -4 }, { x: 7, z: -4 },
+                { x: -7, z: 0 }, { x: -3.5, z: 0 }, { x: 0, z: 0 }, { x: 3.5, z: 0 }, { x: 7, z: 0 },
+                { x: -7, z: 4 }, { x: -3.5, z: 4 }, { x: 0, z: 4 }, { x: 3.5, z: 4 }, { x: 7, z: 4 },
+                { x: -7, z: 8 }, { x: -3.5, z: 8 }, { x: 0, z: 8 }, { x: 3.5, z: 8 }, { x: 7, z: 8 }
+            ];
+            
+            cafeteriaCeilingLights.forEach(pos => {
+                const light = new THREE.PointLight(0xffffee, 0.000003, 18);
+                light.position.set(pos.x, 5.5, pos.z);
+                interior.add(light);
+            });
+            
+            return interior;
+        }
+
+        // Создание столовой (теперь на 2 этаже второго корпуса)
+        function createCafeteria(x, z) {
+            const cafeteria = new THREE.Group();
+            cafeteria.position.set(x, 0, z);
+            
+
+            // Раздаточная линия
+            const servingLine = new THREE.Mesh(
+                new THREE.BoxGeometry(8, 1, 1),
+                new THREE.MeshPhongMaterial({ color: 0xC0C0C0 })
+            );
+            servingLine.position.set(0, 0.5, 10);
+            cafeteria.add(servingLine);
+            
+            // Столы для еды на раздаточной линии
+            const foodTable1 = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 0.6, 0.8),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            foodTable1.position.set(-2, 0.75, 10);
+            cafeteria.add(foodTable1);
+            
+            // Еда на первом столе раздачи (супы и горячее)
+            for (let i = 0; i < 4; i++) {
+                const plate = createPlate(-2.6 + i * 0.4, 1.05, 10, 0);
+                cafeteria.add(plate);
+            }
+            
+            const foodTable2 = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 0.6, 0.8),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            foodTable2.position.set(2, 0.75, 10);
+            cafeteria.add(foodTable2);
+            
+            // Еда на втором столе раздачи (салаты и десерты)
+            for (let i = 0; i < 4; i++) {
+                const plate = createPlate(1.4 + i * 0.4, 1.05, 10, 0);
+                cafeteria.add(plate);
+            }
+            
+            return cafeteria;
+        }
+
+        // Создание зоны отдыха
+        function createRelaxationZone(x, z) {
+            const zone = new THREE.Group();
+            zone.position.set(x, 0, z);
+            
+            // Ковер
+            const carpet = new THREE.Mesh(
+                new THREE.BoxGeometry(10, 0.05, 6),
+                new THREE.MeshPhongMaterial({ color: 0xF4A900 })
+            );
+            carpet.position.set(6, 0.03, 2);
+            carpet.rotation.y = Math.PI / 2;
+            zone.add(carpet);
+            
+            // Диваны
+            const sofa1 = createSofa(8.2, 3, 270);
+            zone.add(sofa1);
+        
+            const sofa3 = createSofa(5.7, -1, 0);
+            zone.add(sofa3);
+
+            // const sofa2 = createSofa(3.6, 3, 90);
+            // zone.add(sofa2);
+            
+            // Чайный столик
+            const teeTable = new THREE.Mesh(
+                new THREE.CylinderGeometry(1, 1, 0.7, 16),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            teeTable.position.set(6, 0.25, 3);
+            zone.add(teeTable);
+            
+            // Чайник на столике (повернут на 90 градусов, чтобы носик был виден)
+            const teapot = createTeapot(6, 0.6, 3);
+            teapot.rotation.y = Math.PI / 2; // Поворачиваем на 90 градусов
+            zone.add(teapot);
+            
+            // Кружки вокруг чайника
+            const mugColors = [0xFF6347, 0x4169E1, 0x32CD32, 0xFFD700];
+            const mugPositions = [
+                { x: 5.5, z: 2.5 },
+                { x: 6.5, z: 2.5 },
+                { x: 5.5, z: 3.5 },
+                { x: 6.5, z: 3.5 }
+            ];
+            
+            mugPositions.forEach((pos, index) => {
+                const mug = createMug(pos.x, 0.6, pos.z, mugColors[index]);
+                zone.add(mug);
+            });
+            
+            // Освещение
+            const lamp = createTableLamp(8, -1, 2);
+            zone.add(lamp);
+            
+            return zone;
+        }
+
+        // Создание дивана
+        function createSofa(x, z, rotation) {
+            const sofa = new THREE.Group();
+            
+            const sofaMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+            const cushionMaterial = new THREE.MeshPhongMaterial({ color: 0xA0522D });
+            
+            // Основа дивана
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 0.3, 1.2),
+                sofaMaterial
+            );
+            base.position.y = 0.36;
+            sofa.add(base);
+            
+            // Спинка
+            const back = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 0.9, 0.2),
+                sofaMaterial
+            );
+            back.position.set(0, 0.9, -0.5);
+            sofa.add(back);
+            
+            // Подушки
+            const cushion1 = new THREE.Mesh(
+                new THREE.BoxGeometry(2.9, 0.1, 1),
+                cushionMaterial
+            );
+            cushion1.position.set(0, 0.57, 0);
+            sofa.add(cushion1);
+            
+            // Ножки
+            const legMaterial = new THREE.MeshPhongMaterial({ color: 0x654321 });
+            const legPositions = [
+                [-1.4, 0.1, 0.5],
+                [1.4, 0.1, 0.5],
+                [-1.4, 0.1, -0.5],
+                [1.4, 0.1, -0.5]
+            ];
+            
+            legPositions.forEach(pos => {
+                const leg = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.1, 0.1, 0.2, 8),
+                    legMaterial
+                );
+                leg.position.set(pos[0], pos[1], pos[2]);
+                sofa.add(leg);
+            });
+            
+            sofa.position.set(x, 0, z);
+            sofa.rotation.y = rotation * Math.PI / 180;
+            
+            return sofa;
+        }
+
+        // Создание настольной лампы
+        function createTableLamp(x, z, rotation) {
+            const lamp = new THREE.Group();
+            
+            // Основание
+            const base = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.3, 0.1, 8),
+                new THREE.MeshPhongMaterial({ color: 0x8B4513 })
+            );
+            base.position.y = 0.05;
+            lamp.add(base);
+            
+            // Стойка
+            const stand = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.8, 8),
+                new THREE.MeshPhongMaterial({ color: 0xC0C0C0 })
+            );
+            stand.position.y = 0.5;
+            lamp.add(stand);
+            
+            // Абажур
+            const shade = new THREE.Mesh(
+                new THREE.ConeGeometry(0.4, 0.3, 8),
+                new THREE.MeshPhongMaterial({ color: 0xFFE4B5 })
+            );
+            shade.position.y = 0.9;
+            shade.rotation.x = Math.PI;
+            lamp.add(shade);
+            
+            // Источник света (декоративный)
+            const lightBulb = new THREE.Mesh(
+                new THREE.SphereGeometry(0.1, 8, 8),
+                new THREE.MeshPhongMaterial({ color: 0xFFFF00 })
+            );
+            lightBulb.position.y = 0.75;
+            lamp.add(lightBulb);
+            
+            lamp.position.set(x, 0, z);
+            lamp.rotation.y = rotation * Math.PI / 180;
+            
+            return lamp;
+        }
+            
+        // Переключение между внешним и внутренним видом
+        function toggleSchoolEntrance() {
+            if (isInsideSchool) {
+                // Выходим из школы
+                camera.position.set(50, 40, 80);
+                controls.target.set(0, 0, 0);
+                isInsideSchool = false;
+                currentFloor = 1;
+                currentBuilding = 1;
+                scene.background = new THREE.Color(0x87CEEB);
+                
+                // Показываем внешнюю сцену, скрываем внутреннюю
+                exteriorGroup.visible = true;
+                interiorGroup.visible = false;
+                interiorSecondFloorGroup.visible = false;
+                interiorSecondBuildingGroup.visible = false;
+                interiorSecondBuildingSecondFloorGroup.visible = false;
+                
+                // Обновляем кнопки
+                document.getElementById('btnEnterExit').textContent = '🚪 Войти в школу';
+                document.getElementById('btnFloor').disabled = true;
+                document.getElementById('btnFloor').style.display = 'none';
+                document.getElementById('btnBuilding').disabled = true;
+                document.getElementById('btnBuilding').style.display = 'none';
+
+            } else {
+                // Входим в школу
+                camera.position.set(0, 2.7, 3);
+                controls.target.set(0, 2, 0);
+                isInsideSchool = true;
+                currentFloor = 1;
+                currentBuilding = 1;
+                scene.background = new THREE.Color(0x555555);
+                
+                // Сохраняем начальную позицию как валидную
+                lastValidPosition.copy(camera.position);
+                
+                // Показываем внутреннюю сцену, скрываем внешнюю
+                exteriorGroup.visible = false;
+                interiorGroup.visible = true;
+                interiorSecondFloorGroup.visible = false;
+                interiorSecondBuildingGroup.visible = false;
+                interiorSecondBuildingSecondFloorGroup.visible = false;
+                
+                // Обновляем кнопки
+                document.getElementById('btnEnterExit').textContent = '🚪 Выйти из школы';
+                document.getElementById('btnFloor').disabled = false;
+                document.getElementById('btnFloor').style.display = '';
+                document.getElementById('btnFloor').textContent = '⬆️ 2-й этаж';
+                document.getElementById('btnBuilding').disabled = false;
+                document.getElementById('btnBuilding').style.display = '';
+                document.getElementById('btnBuilding').textContent = '🏫 Второй корпус';
+            }
+            controls.update();
+        }
+        
+        // Переключение между этажами
+        function toggleFloor() {
+            if (!isInsideSchool) return;
+            
+            if (currentBuilding === 1) {
+                // В первом корпусе
+                if (currentFloor === 1) {
+                    // Поднимаемся на второй этаж первого корпуса
+                    currentFloor = 2;
+                    interiorGroup.visible = false;
+                    interiorSecondFloorGroup.visible = true;
+                    interiorSecondBuildingGroup.visible = false;
+                    interiorSecondBuildingSecondFloorGroup.visible = false;
+                    
+                    // Устанавливаем камеру около лестницы на втором этаже - ИСПРАВЛЕНО: нормальная высота
+                    camera.position.set(-2, 2.7, -3); // Высота как на первом этаже
+                    controls.target.set(0, 2.7, 7);
+                    
+                    document.getElementById('btnFloor').textContent = '⬇️ 1-й этаж';
+                } else {
+                    // Спускаемся на первый этаж первого корпуса
+                    currentFloor = 1;
+                    interiorGroup.visible = true;
+                    interiorSecondFloorGroup.visible = false;
+                    interiorSecondBuildingGroup.visible = false;
+                    interiorSecondBuildingSecondFloorGroup.visible = false;
+                    
+                    // Возвращаем камеру на первый этаж
+                    camera.position.set(0, 2.7, 3);
+                    controls.target.set(0, 2, 0);
+                    
+                    document.getElementById('btnFloor').textContent = '⬆️ 2-й этаж';
+                }
+            } else {
+                // Во втором корпусе
+                if (currentFloor === 1) {
+                    // Поднимаемся на второй этаж второго корпуса
+                    currentFloor = 2;
+                    interiorGroup.visible = false;
+                    interiorSecondFloorGroup.visible = false;
+                    interiorSecondBuildingGroup.visible = false;
+                    interiorSecondBuildingSecondFloorGroup.visible = true;
+                    
+                    // Устанавливаем камеру около лестницы на втором этаже второго корпуса - ИСПРАВЛЕНО
+                    camera.position.set(-2, 2.7, -3);
+                    controls.target.set(0, 2.2, -2.5);
+                    
+                    document.getElementById('btnFloor').textContent = '⬇️ 1-й этаж';
+                } else {
+                    // Спускаемся на первый этаж второго корпуса
+                    currentFloor = 1;
+                    interiorGroup.visible = false;
+                    interiorSecondFloorGroup.visible = false;
+                    interiorSecondBuildingGroup.visible = true;
+                    interiorSecondBuildingSecondFloorGroup.visible = false;
+                    
+                    // Возвращаем камеру на первый этаж второго корпуса
+                    camera.position.set(7, 2.7, 0);
+                    controls.target.set(-3, 2, 1);
+                    
+                    document.getElementById('btnFloor').textContent = '⬆️ 2-й этаж';
+                }
+            }
+            
+            // Сохраняем новую позицию как валидную
+            lastValidPosition.copy(camera.position);
+            
+            controls.update();
+        }
+        
+        // Переключение между корпусами
+        function toggleBuilding() {
+            if (!isInsideSchool) return;
+            
+            if (currentBuilding === 1) {
+                // Переходим во второй корпус
+                currentBuilding = 2;
+                interiorGroup.visible = false;
+                interiorSecondFloorGroup.visible = false;
+                interiorSecondBuildingGroup.visible = true;
+                interiorSecondBuildingSecondFloorGroup.visible = false;
+                
+                // Перемещаем камеру ко входу во втором корпусе
+                camera.position.set(7, 2.7, 0);
+                controls.target.set(-3, 2, 1);
+                
+                document.getElementById('btnBuilding').textContent = '🏫 Первый корпус';
+                document.getElementById('btnFloor').textContent = '⬆️ 2-й этаж';
+            } else {
+                // Возвращаемся в первый корпус
+                currentBuilding = 1;
+                interiorGroup.visible = true;
+                interiorSecondBuildingGroup.visible = false;
+                interiorSecondBuildingSecondFloorGroup.visible = false;
+                
+                // Перемещаем камеру ко входу в первом корпусе
+                camera.position.set(-12, 2.7, 1);
+                controls.target.set(-3, 2, 0);
+                
+                document.getElementById('btnBuilding').textContent = '🏫 Второй корпус';
+                document.getElementById('btnFloor').textContent = '⬆️ 2-й этаж';
+            }
+            
+            currentFloor = 1;
+            
+            // Сохраняем новую позицию как валидную
+            lastValidPosition.copy(camera.position);
+            
+            controls.update();
+        }
+        
+        // Привязка кнопок
+        document.getElementById('btnEnterExit').addEventListener('click', toggleSchoolEntrance);
+        document.getElementById('btnFloor').addEventListener('click', toggleFloor);
+        document.getElementById('btnBuilding').addEventListener('click', toggleBuilding);
+        
+        // Дополнительно можно оставить поддержку клавиш для удобства
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'KeyE') {
+                toggleSchoolEntrance();
+            }
+            if (event.code === 'KeyF' && isInsideSchool) {
+                toggleFloor();
+            }
+            if (event.code === 'KeyB' && isInsideSchool) {
+                toggleBuilding();
+            }
+        });
+        
+        // Создание объектов сцены
+
+        // Добавляем небо (светло-голубое)
+        const sky = createSky();
+        exteriorGroup.add(sky);
+            
+        // Добавляем солнце
+        const sun = createSun();
+        exteriorGroup.add(sun);
+
+        const school = createSchool();
+        exteriorGroup.add(school);
+        
+        // Добавляем внутренние помещения
+        const schoolInterior = createSchoolInterior();
+        interiorGroup.add(schoolInterior);
+        
+        const schoolInteriorSecondFloor = createSchoolInteriorSecondFloor();
+        interiorSecondFloorGroup.add(schoolInteriorSecondFloor);
+        
+        const secondBuildingInterior = createSecondBuildingInterior();
+        interiorSecondBuildingGroup.add(secondBuildingInterior);
+        
+        const secondBuildingSecondFloor = createSecondBuildingSecondFloor();
+        interiorSecondBuildingSecondFloorGroup.add(secondBuildingSecondFloor);
+        
+        const environment = createEnvironment();
+        exteriorGroup.add(environment);
+        
+        // Анимация
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Сохраняем текущую позицию камеры
+            const currentPosition = camera.position.clone();
+            
+            // Проверка столкновений камеры с внутренними стенами
+            if (isInsideSchool) {
+                if (!checkCameraInteriorCollision(camera.position)) {
+                    // Если столкновений нет, сохраняем эту позицию как валидную
+                    lastValidPosition.copy(camera.position);
+                } else {
+                    // Если есть столкновение, возвращаем камеру на последнюю валидную позицию
+                    camera.position.copy(lastValidPosition);
+                    // Также обновляем target контролов, чтобы не было резкого движения
+                    controls.target.add(camera.position).sub(currentPosition);
+                }
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+
+        // Создание неба (светло-голубое)
+        function createSky() {
+            const skyGeometry = new THREE.SphereGeometry(800, 32, 32);
+            const skyMaterial = new THREE.MeshPhongMaterial({
+                color: 0x87CEEB, // Светло-голубой цвет
+                side: THREE.BackSide
+            });
+            
+            const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+            return sky;
+        }
+        
+        // Создание солнца
+        function createSun() {
+            const sunGeometry = new THREE.SphereGeometry(5, 30, 30);
+            const sunMaterial = new THREE.MeshBasicMaterial({
+                color: 0xFFFF00,
+                fog: false
+            });
+            
+            const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+            sun.position.set(50, 60, 30);
+            
+            // Создаем свечение вокруг солнца
+            const sunGlowGeometry = new THREE.SphereGeometry(7, 30, 30);
+            const sunGlowMaterial = new THREE.MeshBasicMaterial({
+                color: 0xFFFF00,
+                transparent: true,
+                opacity: 0.3
+            });
+            
+            const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+            sun.add(sunGlow);
+            
+            return sun;
+        }
+    </script>
+</body>
+</html>
