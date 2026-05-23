@@ -582,6 +582,10 @@ footer {
 
 /* Адаптивность — Мобильные */
 @media (max-width: 768px) {
+    .navbar {
+        height: 9vh;
+    }
+
     .nav-links {
         position: fixed;
         top: 60px;
@@ -627,7 +631,7 @@ footer {
     }
 
     .hero {
-        margin-top: 60px;
+        margin-top: 9vh;
         height: auto;
         min-height: calc(100vh - 60px);
         align-items: center;
