@@ -35,7 +35,7 @@ body {
 }
 
 .logo-img {
-    width: 90px;
+    width: 84px;
     height: 70px;
     margin-right: 16px;
     border-radius: 52px;
@@ -390,7 +390,7 @@ body {
 }
 
 .comparison {
-    padding: 70px 0;
+    padding: 70px 30px;
     background: #f0f3ff;
 }
 
@@ -784,7 +784,10 @@ footer {
         margin: 20px 0;
     }
 
-    .comparison-table th,
+    .comparison-table th {
+        display: none;
+    }
+
     .comparison-table td {
         padding: 12px 8px;
     }
