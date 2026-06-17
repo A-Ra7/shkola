@@ -178,9 +178,40 @@ body {
     align-self:flex-end;
 }
 
+.button2 {
+    background: rgb(255, 194, 41);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    font-size: 20px;
+    font-weight: 700;
+    text-decoration: none;
+    align-self:flex-end;
+}
+
 .button:hover {
     background: #ff2222;
     box-shadow: 0 10px 20px rgba(255, 0, 0, 0.2);
+}
+
+.button:active {
+    background: #ff2222;
+    box-shadow: 0 10px 20px rgba(255, 0, 0, 0.2);
+}
+
+.button2:hover {
+    background: #f5d103;
+    box-shadow: 0 10px 20px #f4c0065e;
+}
+
+.button2:active {
+    background: #f5d103;
+    box-shadow: 0 10px 20px #f4c0065e;
 }
 
 /* Features Section */
