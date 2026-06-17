@@ -194,22 +194,22 @@
                 pointer-events: auto;
             }
             #btnEnterExit {
-                bottom: 12px;
+                bottom: 20px;
                 left: 50%;
                 transform: translateX(-50%);
             }
             #btnWalk {
-                bottom: 55px;
+                bottom: 65px;
                 left: 50%;
                 transform: translateX(-50%);
             }
             #btnFloor {
-                bottom: 12px;
+                bottom: 20px;
                 right: 12px;
                 transform: none;
             }
             #btnBuilding {
-                bottom: 12px;
+                bottom: 20px;
                 left: 12px;
                 transform: none;
             }
@@ -235,17 +235,17 @@
                 font-size: 12px;
             }
             #btnEnterExit {
-                bottom: 8px;
+                bottom: 16px;
             }
             #btnWalk {
-                bottom: 48px;
+                bottom: 56px;
             }
             #btnFloor {
-                bottom: 8px;
+                bottom: 16px;
                 right: 7px;
             }
             #btnBuilding {
-                bottom: 8px;
+                bottom: 16px;
                 left: 7px;
             }
         }
@@ -6067,8 +6067,11 @@
                 controls.target.copy(newTarget);
             }
             
-                // Первый переход в школу
+            // Первый переход в школу
             setTimeout(() => {
+                // Включаем полный экран при входе в школу
+                toggleFullscreen();
+                
                 // Входим в школу 
                 camera.position.set(0, 3, 3);
                 controls.target.set(0, 4.5, 0);
