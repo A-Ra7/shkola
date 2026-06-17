@@ -723,6 +723,10 @@ footer {
         font-size: 18px;
     }
 
+    .main-btn {
+        display: none;
+    }
+
     .features {
         padding: 50px 0;
     }
