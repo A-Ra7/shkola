@@ -11,7 +11,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 100%);
+            background: transparent;
             font-family: Arial, sans-serif;
         }
         
@@ -24,6 +24,7 @@
             width: 100vw !important;
             height: 100vh !important;
             touch-action: none;
+            z-index: 1;
         }
         
         /* Блокировка скролла во время экскурсии */
@@ -107,8 +108,8 @@
             flex-direction: column;
             gap: 10px;
             z-index: 200;
-            padding: 10px;
             box-sizing: border-box;
+            padding: 12px;
         }
         .action-btn {
             background: rgba(0, 0, 0, 0.7);
@@ -155,13 +156,10 @@
                 display: none;
             }
             #info {
-                font-size: 18px;
-                top: 10px;
-                text-align: center;
-                width: 100%;
-                padding: 0;
-                left: 50%;
-                transform: translateX(-50%);
+                opacity: 1;
+            }
+            #info.fullscreen {
+                display: none;
             }
             #musicControls {
                 top: 8px;
@@ -172,6 +170,9 @@
                 font-size: 13px;
                 gap: 6px;
             }
+            #musicControls.fullscreen {
+                display: none;
+            }
             #musicToggle {
                 padding: 3px 10px;
                 font-size: 12px;
@@ -181,6 +182,7 @@
                 width: auto;
                 align-items: stretch;
                 pointer-events: none;
+                padding: 0;
             }
             .action-btn {
                 position: absolute;
@@ -490,6 +492,21 @@
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
+            }
+        }
+        
+        // Переключение полного экрана (только для мобильных)
+        function toggleFullscreen() {
+            if (window.innerWidth <= 1000) {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Ошибка при включении полного экрана: ${err.message}`);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
             }
         }
         
@@ -1249,7 +1266,7 @@
             rightPole.castShadow = true;
             netGroup.add(rightPole);
             
-            // Волейбольная сетка (шире, ориентирована по Z)
+            // Волейбольная сетка 2
             const netGeo = new THREE.PlaneGeometry(2.5, 22);
             const netMat = new THREE.MeshPhongMaterial({ 
                 color: 0xFFFFFF, 
@@ -1277,9 +1294,10 @@
                 new THREE.Vector3(0, 1.0, 10.9),
                 new THREE.Vector3(0, 3.3, -10.9)
             ];
-            const diagGeometry2 = new THREE.BufferGeometry().setFromPoints([diagPoints2[0], diagPoints2[1]]);
-            const diagMaterial2 = new THREE.LineBasicMaterial({ color: 0xFFFFFF, linewidth: 2 });
-            const diagLine2 = new THREE.Line(diagGeometry2, diagMaterial2);
+            const diagCurve2 = new THREE.CatmullRomCurve3(diagPoints2);
+            const diagGeo2 = new THREE.TubeGeometry(diagCurve2, 10, 0.01, 4, false);
+            const diagMat2 = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+            const diagLine2 = new THREE.Mesh(diagGeo2, diagMat2);
             netGroup.add(diagLine2);
             
             netGroup.position.set(x, 0, z);
@@ -3129,7 +3147,7 @@
             crossbar.rotation.y = Math.PI / 2;
             gateGroup.add(crossbar);
             
-            gateGroup.position.set(32.5, 0, 13.5);
+            gateGroup.position.set(32.5, 0, 13);
             
             return gateGroup;
         }
@@ -4966,9 +4984,10 @@
                 new THREE.Vector3(7, 1.0, 1.5),
                 new THREE.Vector3(-7, 3.3, 1.5)
             ];
-            const gymDiagGeometry2 = new THREE.BufferGeometry().setFromPoints([gymDiagPoints2[0], gymDiagPoints2[1]]);
-            const gymDiagMaterial2 = new THREE.LineBasicMaterial({ color: 0xFFFFFF, linewidth: 2 });
-            const gymDiagLine2 = new THREE.Line(gymDiagGeometry2, gymDiagMaterial2);
+            const gymDiagCurve2 = new THREE.CatmullRomCurve3(gymDiagPoints2);
+            const gymDiagGeo2 = new THREE.TubeGeometry(gymDiagCurve2, 10, 0.01, 4, false);
+            const gymDiagMat2 = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+            const gymDiagLine2 = new THREE.Mesh(gymDiagGeo2, gymDiagMat2);
             gym.add(gymDiagLine2);
             
             // Разметка спортзала
@@ -5659,6 +5678,15 @@
         function stopAutoTour() {
             autoTourActive = false;
             
+            // Выходим из полного экрана
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
+            }
+            
+            // Убираем класс fullscreen с элементов
+            document.getElementById('info').classList.remove('fullscreen');
+            document.getElementById('musicControls').classList.remove('fullscreen');
+            
             // Разблокируем скролл при остановке экскурсии
             document.body.classList.remove('no-scroll');
             document.documentElement.classList.remove('no-scroll');
@@ -5738,6 +5766,9 @@
             
         // Режим прогулки
         function startWalkMode() {
+            // Включаем полный экран
+            toggleFullscreen();
+            
             // Если активна экскурсия - сначала останавливаем её
             if (autoTourActive) {
                 stopAutoTour();
@@ -5778,6 +5809,10 @@
             document.body.style.width = '100%';
             document.body.style.height = '100%';
             
+            // Скрываем мобильные элементы в полном экране
+            document.getElementById('info').classList.add('fullscreen');
+            document.getElementById('musicControls').classList.add('fullscreen');
+            
             // Блокируем события скролла
             document.addEventListener('wheel', blockScroll, { passive: false });
             document.addEventListener('touchmove', blockScroll, { passive: false });
@@ -5802,6 +5837,15 @@
             isWalkMode = false;
             controls.enabled = true;
             document.getElementById('btnWalk').textContent = '🚶 Экскурсия';
+            
+            // Выходим из полного экрана
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
+            }
+            
+            // Убираем класс fullscreen с элементов
+            document.getElementById('info').classList.remove('fullscreen');
+            document.getElementById('musicControls').classList.remove('fullscreen');
             
             // Разблокируем скролл только если пользователь принудительно остановил прогулку
             if (teleportToEnd) {
@@ -6076,6 +6120,15 @@
                 currentBuilding = 1;
                 scene.background = new THREE.Color(0x87CEEB);
                 
+                // Выходим из полного экрана
+                if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
+                }
+                
+                // Убираем класс fullscreen с элементов
+                document.getElementById('info').classList.remove('fullscreen');
+                document.getElementById('musicControls').classList.remove('fullscreen');
+                
                 // Включаем зум снаружи школы
                 controls.enableZoom = true;
                 
@@ -6133,6 +6186,10 @@
                 }
                 
                 // Входим в школу (камера на высоте 1.6м - как у человека)
+                
+                // Включаем полный экран
+                toggleFullscreen();
+                
                 camera.position.set(0, 1.6, 3);
                 controls.target.set(0, 1.5, 0);
                 isInsideSchool = true;
