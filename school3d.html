@@ -3334,7 +3334,7 @@
                 { x: -10, z: 4 }, { x: -5, z: 4 }, { x: 0, z: 4 }, { x: 5, z: 4 }, { x: 10, z: 4 },
                 { x: -10, z: -4 }, { x: -5, z: -4 }, { x: 0, z: -4 }, { x: 5, z: -4 }, { x: 10, z: -4 }
             ];
-            
+                
             ceilingLights.forEach(pos => {
                 const light = new THREE.PointLight(0xffffee, 0.0005, 18);
                 light.position.set(pos.x, 5.5, pos.z);
@@ -3867,7 +3867,7 @@
                 { x: -4, z: -3 }, { x: 0, z: -3 }, { x: 4, z: -3 },
                 { x: -4, z: 3 }, { x: 0, z: 3 }, { x: 4, z: 3 }
             ];
-                
+            
             deskPositions.forEach(pos => {
                 const desk = createComputerDesk(pos.x, pos.z);
                 classroom.add(desk);
@@ -5733,7 +5733,7 @@
                 document.getElementById('btnFloor').style.display = 'none';
                 document.getElementById('btnBuilding').style.display = 'none';
             }
-            
+                
             document.getElementById('btnEnterExit').disabled = false;
             document.getElementById('btnEnterExit').style.pointerEvents = '';
             document.getElementById('btnEnterExit').style.opacity = '';
@@ -5747,9 +5747,9 @@
             document.getElementById('btnWalk').textContent = '🚶 Экскурсия';
             
             // Показываем кнопки обратно
+            document.getElementById('btnEnterExit').style.removeProperty('pointer-events');
+            document.getElementById('btnEnterExit').style.removeProperty('opacity');
             document.getElementById('btnEnterExit').disabled = false;
-            document.getElementById('btnEnterExit').style.pointerEvents = '';
-            document.getElementById('btnEnterExit').style.opacity = '';
             // Не скрываем кнопки на мобильных устройствах
             if (window.innerWidth > 1000) {
                 document.getElementById('btnFloor').style.setProperty('display', 'none', 'important');
@@ -5907,6 +5907,9 @@
         // Автоматическая экскурсия после прогулки
         function startAutoTour() {
             autoTourActive = true;
+            
+            // Сбрасываем вертикальную позицию камеры при старте экскурсии
+            camera.position.y = 1.8;
             
             // Блокируем скролл во время автоматической экскурсии
             document.body.classList.add('no-scroll');
@@ -6181,6 +6184,9 @@
                 document.getElementById('btnFloor').style.display = 'none';
                 document.getElementById('btnBuilding').disabled = true;
                 document.getElementById('btnBuilding').style.display = 'none';
+                
+                // Обновляем надпись при выходе из школы
+                info.textContent = 'Школа Мечты 3Д';
             } else {
                 // Если мы в режиме прогулки - останавливаем её
                 if (isWalkMode) {
