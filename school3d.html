@@ -150,6 +150,11 @@
             background: #55cc55;
         }
 
+        /* Скрываем кнопки этажа и корпуса по умолчанию - показываются только внутри школы */
+        #btnFloor, #btnBuilding {
+            display: none;
+        }
+
         /* Мобильная версия */
         @media (max-width: 1000px) {
             #controls {
@@ -157,9 +162,6 @@
             }
             #info {
                 opacity: 1;
-            }
-            #info.fullscreen {
-                display: none;
             }
             #musicControls {
                 top: 8px;
@@ -170,47 +172,57 @@
                 font-size: 13px;
                 gap: 6px;
             }
-            #musicControls.fullscreen {
-                display: none;
-            }
             #musicToggle {
                 padding: 3px 10px;
                 font-size: 12px;
             }
             .action-buttons {
-                position: static;
-                width: auto;
-                align-items: stretch;
+                position: fixed;
+                top: 50%;
+                left: 0;
+                right: 0;
+                width: 100%;
+                transform: translateY(-50%);
                 pointer-events: none;
                 padding: 0;
+                z-index: 200;
             }
             .action-btn {
                 position: absolute;
-                padding: 8px 14px;
+                padding: 10px 16px;
                 font-size: 14px;
                 min-width: auto;
                 max-width: none;
                 white-space: nowrap;
                 pointer-events: auto;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                transform: none;
+                display: flex;
             }
+            /* Кнопка входа/выхода - слева по центру */
             #btnEnterExit {
-                bottom: 28px;
-                left: 50%;
-                transform: translateX(-50%);
+                left: 10px;
+                top: calc(50% + 35px);
+                transform: translateY(-50%);
             }
+            /* Кнопка экскурсии - справа по центру */
             #btnWalk {
-                bottom: 73px;
-                left: 50%;
-                transform: translateX(-50%);
+                right: 10px;
+                top: calc(50% + 35px);
+                transform: translateY(-50%);
             }
+            /* Кнопка этажа - справа выше кнопки входа */
             #btnFloor {
-                bottom: 28px;
-                right: 12px;
+                right: 10px;
+                top: calc(50% - 35px);
                 transform: none;
             }
+            /* Кнопка корпуса - слева выше кнопки экскурсии */
             #btnBuilding {
-                bottom: 28px;
-                left: 12px;
+                left: 10px;
+                top: calc(50% - 35px);
                 transform: none;
             }
         }
@@ -231,22 +243,25 @@
                 font-size: 11px;
             }
             .action-btn {
-                padding: 6px 10px;
+                padding: 8px 12px;
                 font-size: 12px;
+                min-width: auto;
             }
             #btnEnterExit {
-                bottom: 24px;
+                left: 5px;
+                top: calc(50% + 35px);
             }
             #btnWalk {
-                bottom: 64px;
+                right: 5px;
+                top: calc(50% + 35px);
             }
             #btnFloor {
-                bottom: 24px;
-                right: 7px;
+                right: 5px;
+                top: calc(50% - 35px);
             }
             #btnBuilding {
-                bottom: 24px;
-                left: 7px;
+                left: 5px;
+                top: calc(50% - 35px);
             }
         }
 
@@ -447,8 +462,8 @@
     
     <!-- Кнопки управления вместо клавиш -->
     <div class="action-buttons">
-        <button id="btnBuilding" class="action-btn tertiary" style="display:none">🏫 Второй корпус</button>
-        <button id="btnFloor" class="action-btn secondary" style="display:none">⬆️ 2-й этаж</button>
+        <button id="btnFloor" class="action-btn secondary">⬆️ 2-й этаж</button>
+        <button id="btnBuilding" class="action-btn tertiary">🏫 Второй корпус</button>
         <button id="btnEnterExit" class="action-btn">🚪 Войти в школу</button>
         <button id="btnWalk" class="action-btn">🚶 Экскурсия</button>
     </div>
@@ -495,18 +510,15 @@
             }
         }
         
-        // Переключение полного экрана (только для мобильных)
+        // Включение полного экрана (только для мобильных)
         function toggleFullscreen() {
             if (window.innerWidth <= 1000) {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => {
                         console.log(`Ошибка при включении полного экрана: ${err.message}`);
                     });
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    }
                 }
+                // Если полный экран уже включён - НЕ выключаем его
             }
         }
         
@@ -5678,15 +5690,6 @@
         function stopAutoTour() {
             autoTourActive = false;
             
-            // Выходим из полного экрана
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
-            }
-            
-            // Убираем класс fullscreen с элементов
-            document.getElementById('info').classList.remove('fullscreen');
-            document.getElementById('musicControls').classList.remove('fullscreen');
-            
             // Разблокируем скролл при остановке экскурсии
             document.body.classList.remove('no-scroll');
             document.documentElement.classList.remove('no-scroll');
@@ -5705,6 +5708,11 @@
             
             // Выходим из школы если внутри
             if (isInsideSchool) {
+                // Выходим из полного экрана на мобильных
+                if (window.innerWidth <= 1000 && document.fullscreenElement) {
+                    document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
+                }
+                
                 camera.position.set(40, 30, 70);
                 controls.target.set(0, 0, 0);
                 isInsideSchool = false;
@@ -5721,37 +5729,32 @@
                 interiorSecondBuildingGroup.visible = false;
                 interiorSecondBuildingSecondFloorGroup.visible = false;
                 
-                document.getElementById('btnEnterExit').textContent = '🚪 Войти в школу';
-                document.getElementById('btnFloor').disabled = true;
+                // Скрываем кнопки этажа и корпуса - они только для внутри школы
                 document.getElementById('btnFloor').style.display = 'none';
-                document.getElementById('btnBuilding').disabled = true;
-                document.getElementById('btnBuilding').style.display = 'none';
-            } else {
-                camera.position.set(40, 30, 70);
-                controls.target.set(0, 0, 0);
-                
-                // Включаем зум снаружи школы
-                controls.enableZoom = true;
-                
-                exteriorGroup.visible = true;
-                interiorGroup.visible = false;
-                interiorSecondFloorGroup.visible = false;
-                interiorSecondBuildingGroup.visible = false;
-                interiorSecondBuildingSecondFloorGroup.visible = false;
-                
-                document.getElementById('btnEnterExit').textContent = '🚪 Войти в школу';
-                document.getElementById('btnFloor').disabled = true;
-                document.getElementById('btnFloor').style.display = 'none';
-                document.getElementById('btnBuilding').disabled = true;
                 document.getElementById('btnBuilding').style.display = 'none';
             }
-
+            
+            document.getElementById('btnEnterExit').disabled = false;
+            document.getElementById('btnEnterExit').style.pointerEvents = '';
+            document.getElementById('btnEnterExit').style.opacity = '';
+            document.getElementById('btnEnterExit').textContent = '🚪 Войти в школу';
+            document.getElementById('btnFloor').disabled = true;
+            document.getElementById('btnBuilding').disabled = true;
+            // Скрываем кнопки этажа и корпуса - они только для внутри школы
+            document.getElementById('btnFloor').style.setProperty('display', 'none', 'important');
+            document.getElementById('btnBuilding').style.setProperty('display', 'none', 'important');
+            
             document.getElementById('btnWalk').textContent = '🚶 Экскурсия';
             
             // Показываем кнопки обратно
-            document.getElementById('btnEnterExit').style.display = '';
-            document.getElementById('btnFloor').style.display = 'none';
-            document.getElementById('btnBuilding').style.display = 'none';
+            document.getElementById('btnEnterExit').disabled = false;
+            document.getElementById('btnEnterExit').style.pointerEvents = '';
+            document.getElementById('btnEnterExit').style.opacity = '';
+            // Не скрываем кнопки на мобильных устройствах
+            if (window.innerWidth > 1000) {
+                document.getElementById('btnFloor').style.setProperty('display', 'none', 'important');
+                document.getElementById('btnBuilding').style.setProperty('display', 'none', 'important');
+            }
             
             // Принудительно останавливаем музыку
             try {
@@ -5788,17 +5791,17 @@
                 interiorSecondFloorGroup.visible = false;
                 interiorSecondBuildingGroup.visible = false;
                 interiorSecondBuildingSecondFloorGroup.visible = false;
-                
-                document.getElementById('btnEnterExit').textContent = '🚪 Войти в школу';
-                document.getElementById('btnFloor').disabled = true;
-                document.getElementById('btnFloor').style.display = 'none';
-                document.getElementById('btnBuilding').disabled = true;
-                document.getElementById('btnBuilding').style.display = 'none';
-            } else {
-                // Если снаружи - выравниваем камеру по высоте
-                camera.position.set(40, 30, 70);
-                controls.target.set(0, 0, 0);
             }
+                
+            document.getElementById('btnEnterExit').disabled = false;
+            document.getElementById('btnEnterExit').style.pointerEvents = '';
+            document.getElementById('btnEnterExit').style.opacity = '';
+            document.getElementById('btnEnterExit').textContent = '🚪 Войти в школу';
+            document.getElementById('btnFloor').disabled = true;
+            document.getElementById('btnBuilding').disabled = true;
+            // Скрываем кнопки этажа и корпуса - они только для внутри школы
+            document.getElementById('btnFloor').style.setProperty('display', 'none', 'important');
+            document.getElementById('btnBuilding').style.setProperty('display', 'none', 'important');
             
             // Блокируем скролл при начале прогулки
             document.body.classList.add('no-scroll');
@@ -5809,9 +5812,7 @@
             document.body.style.width = '100%';
             document.body.style.height = '100%';
             
-            // Скрываем мобильные элементы в полном экране
-            document.getElementById('info').classList.add('fullscreen');
-            document.getElementById('musicControls').classList.add('fullscreen');
+            // Элементы info и musicControls остаются видимыми во время экскурсии
             
             // Блокируем события скролла
             document.addEventListener('wheel', blockScroll, { passive: false });
@@ -5838,17 +5839,13 @@
             controls.enabled = true;
             document.getElementById('btnWalk').textContent = '🚶 Экскурсия';
             
-            // Выходим из полного экрана
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
-            }
-            
-            // Убираем класс fullscreen с элементов
-            document.getElementById('info').classList.remove('fullscreen');
-            document.getElementById('musicControls').classList.remove('fullscreen');
-            
             // Разблокируем скролл только если пользователь принудительно остановил прогулку
             if (teleportToEnd) {
+                // Выходим из полного экрана при принудительной остановке
+                if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
+                }
+                
                 document.body.classList.remove('no-scroll');
                 document.documentElement.classList.remove('no-scroll');
                 document.body.style.overflow = '';
@@ -5925,14 +5922,22 @@
             document.addEventListener('touchmove', blockScroll, { passive: false });
             document.addEventListener('DOMMouseScroll', blockScroll, { passive: false });
             
-            // Скрываем кнопки управления (оставляем только остановить и музыку)
-            document.getElementById('btnEnterExit').style.display = 'none';
-            document.getElementById('btnFloor').style.display = 'none';
-            document.getElementById('btnBuilding').style.display = 'none';
+            // Скрываем кнопку входа/выхода во время экскурсии всегда
+            const enterBtn = document.getElementById('btnEnterExit');
+            enterBtn.style.setProperty('pointer-events', 'none', 'important');
+            enterBtn.style.setProperty('opacity', '0.3', 'important');
+            // Кнопки этажа и корпуса показываются только внутри школы
+            if (isInsideSchool) {
+                document.getElementById('btnFloor').style.display = 'flex';
+                document.getElementById('btnBuilding').style.display = 'flex';
+            } else {
+                document.getElementById('btnFloor').style.display = 'none';
+                document.getElementById('btnBuilding').style.display = 'none';
+            }
             
             // Обновляем текст кнопки на "Остановить"
             document.getElementById('btnWalk').textContent = '⏹ Остановить';
-            
+                
             // Запускаем музыку для автоматической экскурсии
             if (backgroundMusic.paused) {
                 backgroundMusic.play().catch(e => console.log("Музыка не может быть запущена"));
@@ -5969,6 +5974,13 @@
                             interiorSecondFloorGroup.visible = false;
                             interiorSecondBuildingGroup.visible = false;
                             interiorSecondBuildingSecondFloorGroup.visible = false;
+                            
+                            // Показываем кнопки этажа и корпуса, скрываем кнопку входа/выхода
+                            document.getElementById('btnFloor').style.display = 'flex';
+                            document.getElementById('btnBuilding').style.display = 'flex';
+                            document.getElementById('btnEnterExit').disabled = true;
+                            document.getElementById('btnEnterExit').style.pointerEvents = 'none';
+                            document.getElementById('btnEnterExit').style.opacity = '0.3';
                         }
                         currentFloor = 1;
                         currentBuilding = 1;
@@ -6024,7 +6036,7 @@
                     }
                 }
             ];
-                
+            
             // Запускаем анимацию экскурсии
             function animateTour() {
                 if (!autoTourActive) return;
@@ -6069,10 +6081,7 @@
             
             // Первый переход в школу
             setTimeout(() => {
-                // Включаем полный экран при входе в школу
-                toggleFullscreen();
-                
-                // Входим в школу 
+                // Входим в школу (полный экран уже включён в startWalkMode)
                 camera.position.set(0, 3, 3);
                 controls.target.set(0, 4.5, 0);
                 isInsideSchool = true;
@@ -6115,6 +6124,11 @@
         // Переключение между внешним и внутренним видом
         function toggleSchoolEntrance() {
             if (isInsideSchool) {
+                // Выходим из полного экрана на мобильных
+                if (window.innerWidth <= 1000 && document.fullscreenElement) {
+                    document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
+                }
+                
                 // Выходим из школы
                 camera.position.set(40, 30, 70);
                 controls.target.set(0, 0, 0);
@@ -6123,14 +6137,8 @@
                 currentBuilding = 1;
                 scene.background = new THREE.Color(0x87CEEB);
                 
-                // Выходим из полного экрана
-                if (document.fullscreenElement) {
-                    document.exitFullscreen().catch(err => console.log(`Ошибка при выходе из полного экрана: ${err.message}`));
-                }
-                
-                // Убираем класс fullscreen с элементов
-                document.getElementById('info').classList.remove('fullscreen');
-                document.getElementById('musicControls').classList.remove('fullscreen');
+                // Выходим из полного экрана только если экскурсия не активна
+                // Полный экран остаётся во время экскурсии
                 
                 // Включаем зум снаружи школы
                 controls.enableZoom = true;
@@ -6158,23 +6166,21 @@
                 
                 // Обновляем кнопки
                 document.getElementById('btnEnterExit').textContent = '🚪 Войти в школу';
+                // Скрываем кнопку входа/выхода во время экскурсии
+                if (autoTourActive) {
+                    document.getElementById('btnEnterExit').disabled = true;
+                    document.getElementById('btnEnterExit').style.pointerEvents = 'none';
+                    document.getElementById('btnEnterExit').style.opacity = '0.3';
+                } else {
+                    document.getElementById('btnEnterExit').disabled = false;
+                    document.getElementById('btnEnterExit').style.pointerEvents = '';
+                    document.getElementById('btnEnterExit').style.opacity = '';
+                }
+                // Скрываем кнопки этажа и корпуса - они только для внутри школы
                 document.getElementById('btnFloor').disabled = true;
                 document.getElementById('btnFloor').style.display = 'none';
                 document.getElementById('btnBuilding').disabled = true;
                 document.getElementById('btnBuilding').style.display = 'none';
-
-                // Сбрасываем надпись при выходе из школы
-                info.textContent = 'Школа Мечты 3Д';
-
-                // Если вышла из школы и экскурсия не активна - выключим музыку
-                if (!autoTourActive && !isWalkMode) {
-                    backgroundMusic.pause();
-                    backgroundMusic.currentTime = 0;
-                    backgroundMusic.load();
-                    musicToggle.textContent = 'Включить';
-                    isMusicPlaying = false;
-                }
-
             } else {
                 // Если мы в режиме прогулки - останавливаем её
                 if (isWalkMode) {
@@ -6215,13 +6221,6 @@
                 document.addEventListener('touchmove', blockScroll, { passive: false });
                 document.addEventListener('DOMMouseScroll', blockScroll, { passive: false });
                 
-                // Запускаем музыку при входе в школу
-                // if (backgroundMusic.paused) {
-                //     backgroundMusic.play().catch(e => console.log("Музыка не может быть запущена"));
-                //     musicToggle.textContent = 'Выключить';
-                //     isMusicPlaying = true;
-                // }
-                
                 // Сохраняем начальную позицию как валидную
                 lastValidPosition.copy(camera.position);
                 
@@ -6234,11 +6233,21 @@
                 
                 // Обновляем кнопки
                 document.getElementById('btnEnterExit').textContent = '🚪 Выйти из школы';
+                // Скрываем кнопку входа/выхода только во время экскурсии
+                if (autoTourActive) {
+                    document.getElementById('btnEnterExit').disabled = true;
+                    document.getElementById('btnEnterExit').style.pointerEvents = 'none';
+                    document.getElementById('btnEnterExit').style.opacity = '0.3';
+                } else {
+                    document.getElementById('btnEnterExit').disabled = false;
+                    document.getElementById('btnEnterExit').style.pointerEvents = '';
+                    document.getElementById('btnEnterExit').style.opacity = '';
+                }
                 document.getElementById('btnFloor').disabled = false;
-                document.getElementById('btnFloor').style.display = '';
+                document.getElementById('btnFloor').style.display = 'flex';
                 document.getElementById('btnFloor').textContent = '⬆️ 2-й этаж';
                 document.getElementById('btnBuilding').disabled = false;
-                document.getElementById('btnBuilding').style.display = '';
+                document.getElementById('btnBuilding').style.display = 'flex';
                 document.getElementById('btnBuilding').textContent = '🏫 Второй корпус';
                 
                 // Добавляем надпись о корпусе и этаже
