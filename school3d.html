@@ -5908,6 +5908,9 @@
         function startAutoTour() {
             autoTourActive = true;
             
+            // Включаем полный экран (только для мобильных)
+            toggleFullscreen();
+            
             // Сбрасываем вертикальную позицию камеры при старте экскурсии
             camera.position.y = 1.8;
             
